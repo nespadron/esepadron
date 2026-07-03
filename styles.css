@@ -125,39 +125,12 @@ h1 {
 
 @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
-/* ===== RAYO CON CORRIENTE (estilo Flash) ===== */
+/* ===== ANCLA DEL RAYO REALISTA (el rayo se dibuja en el canvas) ===== */
 .bolt-stage {
     flex-shrink: 0;
-    width: 340px; height: 470px;
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; animation: fadeUp 0.9s 0.5s forwards;
+    width: 300px; height: 440px;
 }
-.bolt-hero { width: 260px; height: auto; overflow: visible; }
-
-/* Relleno del rayo, con parpadeo de energía */
-.bolt-fill {
-    fill: var(--yellow);
-    filter: drop-shadow(0 0 18px var(--glow-y)) drop-shadow(0 0 40px rgba(241,196,15,0.35));
-    animation: boltPulse 2.4s ease-in-out infinite;
-}
-@keyframes boltPulse {
-    0%, 100% { filter: drop-shadow(0 0 14px var(--glow-y)) drop-shadow(0 0 34px rgba(241,196,15,0.28)); }
-    50%      { filter: drop-shadow(0 0 26px var(--glow-y)) drop-shadow(0 0 60px rgba(241,196,15,0.5)); }
-}
-
-/* Corriente eléctrica que corre por el filo (dash viajando) */
-.bolt-current {
-    fill: none;
-    stroke: #fff;
-    stroke-width: 2.5;
-    stroke-linejoin: round;
-    stroke-dasharray: 26 300;
-    filter: drop-shadow(0 0 6px #fff);
-    animation: currentRun 1.6s linear infinite;
-}
-@keyframes currentRun {
-    to { stroke-dashoffset: -326; }
-}
+.logo-img { height: 34px; width: auto; }
 
 /* ===== STATS / BADGES ===== */
 .stats {
@@ -201,15 +174,93 @@ h2 {
 .card-icon { font-size: 1.5rem; margin-bottom: 1rem; }
 .card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.6rem; }
 .card p { color: var(--muted); font-size: 0.875rem; line-height: 1.65; }
+.card-img { width: 100%; height: 160px; object-fit: cover; border-radius: 6px; margin-bottom: 1rem; }
+
+/* ===== DOS COLUMNAS (quiénes somos, clientes, contacto) ===== */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; align-items: center; }
+.two-col h2 { margin-top: 0.5rem; }
+.col-img img, .gallery img { width: 100%; border-radius: 10px; display: block; border: 1px solid var(--border-y); }
+.clients-list { list-style: none; margin: 1.5rem 0; }
+.clients-list li { color: var(--text); margin-bottom: 0.75rem; }
+.clients-list i { color: var(--yellow); margin-right: 0.5rem; }
+.gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.gallery-top { grid-column: 1 / -1; height: 220px; object-fit: cover; }
+.gallery img:not(.gallery-top) { height: 150px; object-fit: cover; }
+
+/* ===== EQUIPOS (nodos interactivos) ===== */
+.energy-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-top: 2rem; }
+.energy-node {
+    background: rgba(19,29,51,0.88); border: 1px solid var(--border-y);
+    border-radius: 8px; padding: 1.5rem 1rem; text-align: center; cursor: pointer;
+    color: var(--text); font-family: inherit;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+.energy-node:hover, .energy-node.active { border-color: var(--yellow); transform: translateY(-3px); box-shadow: 0 0 26px rgba(241,196,15,0.12); }
+.energy-node img { width: 64px; height: 64px; object-fit: contain; margin-bottom: 0.75rem; }
+.energy-node h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.25rem; }
+.energy-node span { font-size: 0.72rem; color: var(--muted); }
+.scope-stage { margin-top: 1.5rem; }
+.scope-card {
+    background: rgba(26,43,76,0.7); border: 1px solid var(--yellow);
+    border-radius: 10px; padding: 1.75rem;
+}
+.scope-badge { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--yellow); font-weight: 700; font-size: 0.9rem; }
+.scope-card h4 { margin: 0.75rem 0 1rem; font-size: 1rem; }
+.scope-card ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.6rem; }
+.scope-card li { color: var(--text); font-size: 0.875rem; line-height: 1.5; }
+.scope-card li i { color: var(--yellow); margin-right: 0.5rem; font-size: 0.7rem; }
+
+/* ===== MARCAS ===== */
+.brand-row { display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; margin-top: 2rem; }
+.brand-card {
+    background: #fff; border-radius: 10px; padding: 1.5rem 2rem;
+    display: flex; align-items: center; justify-content: center; min-width: 180px; height: 110px;
+}
+.brand-card img { max-height: 60px; max-width: 150px; object-fit: contain; }
+
+/* ===== CUMPLIMIENTO ===== */
+.compliance { text-align: center; }
+.comp-icon { width: 80px; height: 80px; object-fit: contain; margin: 0 auto 1rem; display: block; }
+.card-label { color: var(--yellow); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 0.6rem; }
+.norm-tag { margin-top: 1rem; display: inline-block; background: rgba(241,196,15,0.12); color: var(--yellow); font-size: 0.72rem; padding: 0.3rem 0.8rem; border-radius: 20px; }
+.repse-actions { margin-top: 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+.repse-btn { background: var(--grad); color: #0d1526; font-weight: 700; font-size: 0.8rem; padding: 0.5rem 1rem; border-radius: 4px; text-decoration: none; }
+.repse-qr { width: 90px; border-radius: 6px; }
+.dc3-list { list-style: none; text-align: left; margin-top: 0.5rem; }
+.dc3-list li { color: var(--muted); font-size: 0.82rem; margin-bottom: 0.4rem; }
+.dc3-list i { color: var(--yellow); margin-right: 0.4rem; }
 
 /* ===== CONTACTO ===== */
-.contact { max-width: 600px; margin: 0 auto; padding: 2rem 2.5rem 6rem; text-align: center; }
-.contact > p { color: var(--muted); margin-bottom: 2rem; }
-
-footer {
-    border-top: 1px solid var(--border-y); padding: 2rem; text-align: center;
-    font-size: 0.78rem; color: var(--muted); background: rgba(13,21,38,0.6);
+.contact-list { list-style: none; margin-top: 1.5rem; }
+.contact-list li { color: var(--text); margin-bottom: 0.9rem; display: flex; align-items: center; gap: 0.75rem; }
+.contact-list i { color: var(--yellow); width: 18px; text-align: center; }
+.contact-list a { color: var(--text); text-decoration: none; }
+.contact-list a:hover { color: var(--yellow); }
+.contact-list .urgent { color: var(--yellow); font-weight: 700; }
+.form-card { background: rgba(19,29,51,0.9); border: 1px solid var(--border-y); border-radius: 12px; padding: 2rem; }
+.form-card h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.4rem; }
+.form-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.form-card input, .form-card select, .form-card textarea {
+    width: 100%; margin-bottom: 0.75rem; padding: 0.75rem;
+    background: var(--bg); border: 1px solid var(--border-y); border-radius: 6px;
+    color: var(--text); font-family: inherit; font-size: 0.875rem;
 }
+.form-card input:focus, .form-card select:focus, .form-card textarea:focus { outline: none; border-color: var(--yellow); }
+.btn-primary.full { width: 100%; justify-content: center; border: none; cursor: pointer; }
+
+/* ===== FOOTER ===== */
+footer {
+    border-top: 1px solid var(--border-y); padding: 2.5rem 2rem 2rem; text-align: center;
+    font-size: 0.82rem; color: var(--muted); background: rgba(13,21,38,0.6);
+}
+.footer-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.footer-logo { height: 70px; }
+.footer-info { text-align: left; }
+.footer-info p { margin-bottom: 0.4rem; }
+.footer-info i { color: var(--yellow); margin-right: 0.4rem; }
+.footer-info a { color: var(--text); text-decoration: none; }
+.footer-copy { font-size: 0.72rem; opacity: 0.7; }
 
 /* ===== REVEALS ===== */
 .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
@@ -218,6 +269,7 @@ footer {
 /* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
     .stats-inner { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; gap: 2.5rem; }
 }
 @media (max-width: 700px) {
     .nav-links {
@@ -230,8 +282,8 @@ footer {
     .burger { display: flex; }
     .hero { flex-direction: column-reverse; text-align: center; padding: 110px 8% 60px; gap: 1rem; }
     .hero-eyebrow, .cta-group { justify-content: center; }
-    .bolt-stage { width: 200px; height: 260px; }
-    .bolt-hero { width: 150px; }
-    .section, .contact { padding-left: 8%; padding-right: 8%; }
+    .bolt-stage { width: 200px; height: 300px; }
+    .section { padding-left: 8%; padding-right: 8%; }
     .cards { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
 }

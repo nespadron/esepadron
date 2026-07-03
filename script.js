@@ -6,6 +6,34 @@ document.querySelectorAll('.nav-links a').forEach(a =>
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/* ===== ALCANCES POR EQUIPO (interactivo) ===== */
+const SCOPES = {
+    'acometida': ['Inspección visual del estado de los componentes.', 'Limpieza general.', 'Revisión de apartarrayos.', 'Pruebas de resistencia de aislamiento a apartarrayos.', 'Revisión de estado de listón fusible.'],
+    'subestacion': ['Limpieza interna y externa.', 'Inspección visual de los componentes del equipo.', 'Remoción, revisión y limpieza de fusibles.', 'Lubricación de mecanismo de seccionadores.', 'Prueba mecánica a seccionadores.', 'Prueba de resistencia de aislamiento.', 'Prueba de resistencia de contacto.', 'Pruebas eléctricas a relevador de control (si aplica).'],
+    'transformadores-mt': ['Limpieza interna y externa.', 'Inspección visual de los componentes.', 'Prueba de resistencia de aislamiento.', 'Prueba de relación de transformación (TTR).', 'Reapriete de puntos de conexión.'],
+    'transformadores-bt': ['Limpieza interna y externa.', 'Inspección visual de los componentes.', 'Prueba de resistencia de aislamiento.', 'Prueba de relación de transformación (TTR).', 'Reapriete de puntos de conexión.'],
+    'interruptores': ['Limpieza interna y externa.', 'Remoción, inspección y limpieza de cámaras de arqueo.', 'Inspección y limpieza de contactos fijos y móviles.', 'Revisión y lubricación del mecanismo de carga de resorte.', 'Pruebas mecánicas.', 'Pruebas eléctricas a unidad de control con Test-Kit.'],
+    'tableros': ['Limpieza interna y externa.', 'Reapriete general de conexiones de fuerza (bus de barras, cableado de interruptores derivados).', 'Reapriete general de conexiones de control.', 'Comprobación de funcionamiento de fusibles de control (si aplica).']
+};
+const SCOPE_NAMES = { 'acometida': 'Acometida', 'subestacion': 'Subestación', 'transformadores-mt': 'Transformadores MT', 'transformadores-bt': 'Transformadores BT', 'interruptores': 'Interruptores', 'tableros': 'Tableros' };
+(function () {
+    const stage = document.getElementById('scopeStage');
+    const list = document.getElementById('scopeList');
+    const title = document.getElementById('scopeTitle');
+    if (!stage) return;
+    document.querySelectorAll('.energy-node').forEach(node => {
+        node.addEventListener('click', () => {
+            const id = node.dataset.scope;
+            document.querySelectorAll('.energy-node').forEach(n => n.classList.remove('active'));
+            node.classList.add('active');
+            title.textContent = SCOPE_NAMES[id];
+            list.innerHTML = SCOPES[id].map(x => `<li><i class="fas fa-bolt"></i> ${x}</li>`).join('');
+            stage.hidden = false;
+            stage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+    });
+})();
+
 /* ===== FONDO — RED ELÉCTRICA (nodos amarillos + líneas de tensión) ===== */
 if (!reducedMotion) (function () {
     const cv = document.getElementById('canvas-grid');
@@ -110,7 +138,7 @@ if (window.Lenis && window.gsap && window.ScrollTrigger) {
     document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 }
 
-/* ===== RELÁMPAGOS ESTILO FLASH — electricidad corriendo ===== */
+/* ===== RAYO REALISTA + RELÁMPAGOS (canvas) ===== */
 if (!reducedMotion) (function () {
     const cv = document.getElementById('canvas-lightning');
     const cx = cv.getContext('2d');
@@ -119,8 +147,8 @@ if (!reducedMotion) (function () {
     size();
     window.addEventListener('resize', () => { if (window.innerWidth !== W) size(); else H = cv.height = window.innerHeight; }, { passive: true });
 
-    // Genera un rayo dentado entre dos puntos (desplazamiento del punto medio)
-    function bolt(x1, y1, x2, y2, disp) {
+    // Genera un trazo de rayo dentado con desplazamiento del punto medio
+    function jag(x1, y1, x2, y2, disp, branchProb) {
         let segs = [{ x1, y1, x2, y2 }];
         for (let d = disp; d >= 4; d /= 2) {
             const next = [];
@@ -129,10 +157,9 @@ if (!reducedMotion) (function () {
                 const my = (s.y1 + s.y2) / 2 + (Math.random() - 0.5) * d;
                 next.push({ x1: s.x1, y1: s.y1, x2: mx, y2: my });
                 next.push({ x1: mx, y1: my, x2: s.x2, y2: s.y2 });
-                // Ramificación ocasional (las bifurcaciones del rayo de Flash)
-                if (Math.random() < 0.35) {
-                    const ang = Math.atan2(s.y2 - my, s.x2 - mx) + (Math.random() - 0.5) * 1.4;
-                    const len = d * 1.6;
+                if (Math.random() < branchProb) {
+                    const ang = Math.atan2(s.y2 - my, s.x2 - mx) + (Math.random() - 0.5) * 1.5;
+                    const len = d * 1.7;
                     next.push({ x1: mx, y1: my, x2: mx + Math.cos(ang) * len, y2: my + Math.sin(ang) * len });
                 }
             }
@@ -141,39 +168,62 @@ if (!reducedMotion) (function () {
         return segs;
     }
 
-    // Un relámpago vive unos frames y se desvanece
+    // Dibuja un trazo con triple pasada: glow azul, glow amarillo, núcleo blanco (look eléctrico real)
+    function drawStroke(segs, alpha, scale) {
+        cx.globalAlpha = alpha;
+        cx.lineCap = 'round'; cx.lineJoin = 'round';
+        cx.strokeStyle = 'rgba(120,180,255,0.5)'; cx.lineWidth = 7 * scale; cx.shadowColor = '#79b4ff'; cx.shadowBlur = 26;
+        stroke(segs);
+        cx.strokeStyle = 'rgba(241,196,15,0.95)'; cx.lineWidth = 3.5 * scale; cx.shadowColor = '#f1c40f'; cx.shadowBlur = 16;
+        stroke(segs);
+        cx.strokeStyle = '#ffffff'; cx.lineWidth = 1.3 * scale; cx.shadowBlur = 6;
+        stroke(segs);
+    }
+    function stroke(segs) {
+        cx.beginPath();
+        for (const s of segs) { cx.moveTo(s.x1, s.y1); cx.lineTo(s.x2, s.y2); }
+        cx.stroke();
+    }
+
+    // RAYO PRINCIPAL fijo en el hero, que titila y se regenera (como un relámpago real sostenido)
+    const stage = document.getElementById('boltStage');
+    let mainBolt = null, mainTimer = 0, mainVisible = true;
+    function regenMain() {
+        if (!stage) return;
+        const r = stage.getBoundingClientRect();
+        mainVisible = r.bottom > 0 && r.top < H;
+        if (!mainVisible) return;
+        const cx0 = r.left + r.width * 0.5;
+        mainBolt = jag(cx0 + (Math.random() - 0.5) * 30, r.top + 10, cx0 + (Math.random() - 0.5) * 40, r.bottom - 10, 70, 0.5);
+    }
+
+    // Relámpagos que cruzan la pantalla al azar
     const strikes = [];
     function strike() {
         const fromLeft = Math.random() < 0.5;
-        const x1 = fromLeft ? 0 : W, y1 = Math.random() * H * 0.5;
-        const x2 = Math.random() * W, y2 = H * (0.4 + Math.random() * 0.6);
-        strikes.push({ segs: bolt(x1, y1, x2, y2, 120), life: 1 });
+        strikes.push({ segs: jag(fromLeft ? 0 : W, Math.random() * H * 0.5, Math.random() * W, H * (0.4 + Math.random() * 0.6), 130, 0.4), life: 1 });
     }
 
-    function draw() {
+    function frame(t) {
         cx.clearRect(0, 0, W, H);
+
+        // Rayo principal: regenera cada ~90ms para el titileo
+        if (t - mainTimer > 90) { regenMain(); mainTimer = t; }
+        if (mainBolt && mainVisible) drawStroke(mainBolt, 0.85 + Math.random() * 0.15, 1);
+
+        // Relámpagos cruzando
         for (let i = strikes.length - 1; i >= 0; i--) {
             const s = strikes[i];
-            cx.globalAlpha = s.life;
-            // resplandor exterior amarillo
-            cx.strokeStyle = 'rgba(241,196,15,0.9)';
-            cx.lineWidth = 4; cx.shadowColor = '#f1c40f'; cx.shadowBlur = 18;
-            cx.beginPath();
-            for (const seg of s.segs) { cx.moveTo(seg.x1, seg.y1); cx.lineTo(seg.x2, seg.y2); }
-            cx.stroke();
-            // núcleo blanco brillante
-            cx.strokeStyle = '#fff'; cx.lineWidth = 1.4; cx.shadowBlur = 8;
-            cx.stroke();
+            drawStroke(s.segs, s.life, 0.8);
             s.life -= 0.08;
             if (s.life <= 0) strikes.splice(i, 1);
         }
         cx.globalAlpha = 1; cx.shadowBlur = 0;
 
-        // Frecuencia: base + más rápido conforme deslizas por el hero
         const intensity = window.__boltIntensity || 0;
-        if (Math.random() < 0.02 + intensity * 0.06) strike();
-        requestAnimationFrame(draw);
+        if (Math.random() < 0.015 + intensity * 0.05) strike();
+        requestAnimationFrame(frame);
     }
-    draw();
-    setTimeout(strike, 600); // primer rayo de bienvenida
+    requestAnimationFrame(frame);
+    setTimeout(strike, 500);
 })();
