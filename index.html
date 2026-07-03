@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d1526">
+    <meta name="description" content="ESE Padrón S.A. de C.V. — Servicios eléctricos en baja y media tensión. Subestaciones, acometidas, tableros y transformadores. NOM-001, NOM-022, REPSE.">
+    <title>ESE Padrón | Servicios Eléctricos en Baja y Media Tensión</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body>
+
+<div id="scroll-progress" aria-hidden="true"></div>
+<canvas id="canvas-grid" aria-hidden="true"></canvas>
+
+<header class="navbar">
+    <div class="logo">
+        <svg class="logo-bolt" viewBox="0 0 24 32" aria-hidden="true"><path d="M14 0 L2 18 L9 18 L7 32 L22 12 L13 12 Z"/></svg>
+        <span class="logo-text">ESE <span class="accent">PADRÓN</span></span>
+    </div>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="#quienes">Quiénes somos</a></li>
+            <li><a href="#servicios">Servicios</a></li>
+            <li><a href="#normativo">Normativo</a></li>
+            <li><a href="#contacto" class="nav-cta">Cotizar</a></li>
+        </ul>
+    </nav>
+    <div class="burger" aria-label="Menu"><div></div><div></div><div></div></div>
+</header>
+
+<main>
+
+<!-- ===== HERO con rayo 3D ===== -->
+<section class="hero" id="hero">
+    <div class="hero-content">
+        <div class="hero-eyebrow">Baja y media tensión</div>
+        <h1>
+            Energía que<br>
+            <span class="h1-accent">nunca se detiene.</span>
+        </h1>
+        <p class="hero-sub">
+            Somos ESE Padrón: instalamos, mantenemos y certificamos la
+            infraestructura eléctrica de tu planta. Subestaciones, acometidas,
+            tableros y transformadores — con cumplimiento NOM y REPSE.
+        </p>
+        <div class="cta-group">
+            <a href="#contacto" class="btn-primary">Solicita tu diagnóstico →</a>
+            <a href="#servicios" class="btn-outline">Ver servicios</a>
+        </div>
+    </div>
+
+    <!-- Rayo 3D: gira en profundidad conforme deslizas -->
+    <div class="bolt-stage">
+        <div class="bolt-3d" id="bolt3d">
+            <svg class="bolt bolt-back" viewBox="0 0 120 160"><path d="M70 0 L10 90 L45 90 L35 160 L110 60 L65 60 Z"/></svg>
+            <svg class="bolt bolt-mid" viewBox="0 0 120 160"><path d="M70 0 L10 90 L45 90 L35 160 L110 60 L65 60 Z"/></svg>
+            <svg class="bolt bolt-front" viewBox="0 0 120 160"><path d="M70 0 L10 90 L45 90 L35 160 L110 60 L65 60 Z"/></svg>
+        </div>
+    </div>
+</section>
+
+<!-- ===== BADGES NORMATIVOS ===== -->
+<div class="stats">
+    <div class="stats-inner">
+        <div class="stat reveal"><div class="stat-num">NOM-001</div><div class="stat-label">Instalaciones eléctricas</div></div>
+        <div class="stat reveal" style="transition-delay:.1s"><div class="stat-num">NOM-022</div><div class="stat-label">Electricidad estática</div></div>
+        <div class="stat reveal" style="transition-delay:.2s"><div class="stat-num">REPSE</div><div class="stat-label">Registro vigente</div></div>
+        <div class="stat reveal" style="transition-delay:.3s"><div class="stat-num check">ABB</div><div class="stat-label">y Selectric</div></div>
+    </div>
+</div>
+
+<!-- ===== QUIENES SOMOS ===== -->
+<section class="section" id="quienes">
+    <div class="section-label">Quiénes somos</div>
+    <h2 class="reveal">Especialistas en infraestructura eléctrica industrial</h2>
+    <p class="section-sub reveal">
+        Empresa mexicana dedicada a servicios eléctricos en baja y media tensión.
+        Intervenimos subestaciones, acometidas, interruptores, tableros de
+        distribución y transformadores — con personal certificado (DC-3) y
+        cumplimiento normativo completo.
+    </p>
+</section>
+
+<!-- ===== SERVICIOS ===== -->
+<section class="section" id="servicios">
+    <div class="section-label">Servicios</div>
+    <h2 class="reveal">Equipos e infraestructura que intervenimos</h2>
+    <div class="cards">
+        <article class="card reveal"><div class="card-icon">⚡</div><h3>Subestaciones</h3><p>Instalación y mantenimiento de subestaciones eléctricas en media tensión.</p></article>
+        <article class="card reveal" style="transition-delay:.08s"><div class="card-icon">🔌</div><h3>Acometidas</h3><p>Acometidas eléctricas en baja y media tensión, de la red a tu planta.</p></article>
+        <article class="card reveal" style="transition-delay:.16s"><div class="card-icon">🛡️</div><h3>Interruptores</h3><p>Interruptores de potencia: pruebas, mantenimiento y sustitución.</p></article>
+        <article class="card reveal" style="transition-delay:.24s"><div class="card-icon">🗄️</div><h3>Tableros de distribución</h3><p>Diagnóstico, balanceo de cargas y modernización de tableros.</p></article>
+        <article class="card reveal" style="transition-delay:.32s"><div class="card-icon">🔋</div><h3>Transformadores BT</h3><p>Transformadores de baja tensión: pruebas, filtrado y mantenimiento.</p></article>
+        <article class="card reveal" style="transition-delay:.4s"><div class="card-icon">⚙️</div><h3>Transformadores MT</h3><p>Transformadores de media tensión con protocolos de seguridad NOM.</p></article>
+    </div>
+</section>
+
+<!-- ===== NORMATIVO ===== -->
+<section class="section" id="normativo">
+    <div class="section-label">Cumplimiento</div>
+    <h2 class="reveal">Normatividad y seguridad operativa</h2>
+    <p class="section-sub reveal">
+        Trabajamos bajo NOM-001-SEDE y NOM-022-STPS, con registro REPSE vigente
+        y constancias DC-3 de nuestro personal. Tu auditoría no encontrará huecos.
+    </p>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="contact" id="contacto">
+    <div class="section-label">Contacto</div>
+    <h2 class="reveal">Solicita tu diagnóstico eléctrico</h2>
+    <p class="reveal">Agenda una visita técnica y recibe tu cotización.</p>
+    <div class="cta-group center reveal">
+        <a href="https://esepadron.com" class="btn-primary">Solicitar cotización →</a>
+    </div>
+</section>
+
+</main>
+
+<footer><p>© 2026 ESE Padrón S.A. de C.V. · Prototipo de rediseño</p></footer>
+
+<script src="libs/gsap.min.js"></script>
+<script src="libs/ScrollTrigger.min.js"></script>
+<script src="libs/lenis.min.js"></script>
+<script src="script.js?v=1"></script>
+</body>
+</html>
