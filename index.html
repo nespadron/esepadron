@@ -13,6 +13,7 @@
 
 <div id="scroll-progress" aria-hidden="true"></div>
 <canvas id="canvas-grid" aria-hidden="true"></canvas>
+<canvas id="canvas-lightning" aria-hidden="true"></canvas>
 
 <header class="navbar">
     <div class="logo">
@@ -32,7 +33,7 @@
 
 <main>
 
-<!-- ===== HERO con rayo 3D ===== -->
+<!-- ===== HERO estilo Flash: electricidad corriendo ===== -->
 <section class="hero" id="hero">
     <div class="hero-content">
         <div class="hero-eyebrow">Baja y media tensión</div>
@@ -51,13 +52,14 @@
         </div>
     </div>
 
-    <!-- Rayo 3D: gira en profundidad conforme deslizas -->
-    <div class="bolt-stage">
-        <div class="bolt-3d" id="bolt3d">
-            <svg class="bolt bolt-back" viewBox="0 0 120 160"><path d="M70 0 L10 90 L45 90 L35 160 L110 60 L65 60 Z"/></svg>
-            <svg class="bolt bolt-mid" viewBox="0 0 120 160"><path d="M70 0 L10 90 L45 90 L35 160 L110 60 L65 60 Z"/></svg>
-            <svg class="bolt bolt-front" viewBox="0 0 120 160"><path d="M70 0 L10 90 L45 90 L35 160 L110 60 L65 60 Z"/></svg>
-        </div>
+    <!-- Rayo con corriente eléctrica viajando por su filo -->
+    <div class="bolt-stage" id="boltStage">
+        <svg class="bolt-hero" viewBox="0 0 120 170" aria-hidden="true">
+            <!-- capa rellena -->
+            <path class="bolt-fill" d="M70 5 L15 95 L50 95 L40 165 L108 62 L66 62 Z"/>
+            <!-- filo con corriente corriendo (dash animado) -->
+            <path class="bolt-current" d="M70 5 L15 95 L50 95 L40 165 L108 62 L66 62 Z"/>
+        </svg>
     </div>
 </section>
 

@@ -35,6 +35,7 @@ body {
 }
 
 #canvas-grid { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+#canvas-lightning { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
 
 main, footer { position: relative; z-index: 10; }
 
@@ -124,26 +125,39 @@ h1 {
 
 @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
-/* ===== RAYO 3D ===== */
+/* ===== RAYO CON CORRIENTE (estilo Flash) ===== */
 .bolt-stage {
     flex-shrink: 0;
-    width: 340px; height: 460px;
-    perspective: 900px;                 /* profundidad 3D */
+    width: 340px; height: 470px;
     display: flex; align-items: center; justify-content: center;
     opacity: 0; animation: fadeUp 0.9s 0.5s forwards;
 }
-.bolt-3d {
-    position: relative; width: 240px; height: 320px;
-    transform-style: preserve-3d;       /* las 3 capas viven en 3D real */
+.bolt-hero { width: 260px; height: auto; overflow: visible; }
+
+/* Relleno del rayo, con parpadeo de energía */
+.bolt-fill {
+    fill: var(--yellow);
+    filter: drop-shadow(0 0 18px var(--glow-y)) drop-shadow(0 0 40px rgba(241,196,15,0.35));
+    animation: boltPulse 2.4s ease-in-out infinite;
 }
-.bolt { position: absolute; inset: 0; width: 100%; height: 100%; }
-.bolt path { stroke-linejoin: round; }
-.bolt-back  { transform: translateZ(-46px); }
-.bolt-back path  { fill: none; stroke: var(--violet); stroke-width: 4; opacity: 0.8; }
-.bolt-mid   { transform: translateZ(0); }
-.bolt-mid path   { fill: none; stroke: var(--yellow); stroke-width: 3; opacity: 0.55; }
-.bolt-front { transform: translateZ(46px); filter: drop-shadow(0 0 24px var(--glow-y)); }
-.bolt-front path { fill: var(--yellow); }
+@keyframes boltPulse {
+    0%, 100% { filter: drop-shadow(0 0 14px var(--glow-y)) drop-shadow(0 0 34px rgba(241,196,15,0.28)); }
+    50%      { filter: drop-shadow(0 0 26px var(--glow-y)) drop-shadow(0 0 60px rgba(241,196,15,0.5)); }
+}
+
+/* Corriente eléctrica que corre por el filo (dash viajando) */
+.bolt-current {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+    stroke-dasharray: 26 300;
+    filter: drop-shadow(0 0 6px #fff);
+    animation: currentRun 1.6s linear infinite;
+}
+@keyframes currentRun {
+    to { stroke-dashoffset: -326; }
+}
 
 /* ===== STATS / BADGES ===== */
 .stats {
@@ -216,8 +230,8 @@ footer {
     .burger { display: flex; }
     .hero { flex-direction: column-reverse; text-align: center; padding: 110px 8% 60px; gap: 1rem; }
     .hero-eyebrow, .cta-group { justify-content: center; }
-    .bolt-stage { width: 220px; height: 280px; }
-    .bolt-3d { width: 160px; height: 214px; }
+    .bolt-stage { width: 200px; height: 260px; }
+    .bolt-hero { width: 150px; }
     .section, .contact { padding-left: 8%; padding-right: 8%; }
     .cards { grid-template-columns: 1fr; }
 }
