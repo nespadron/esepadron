@@ -185,16 +185,26 @@ if (!reducedMotion) (function () {
         cx.stroke();
     }
 
-    // RAYO PRINCIPAL fijo en el hero, que titila y se regenera (como un relámpago real sostenido)
+    // Silueta del rayo GEOMÉTRICO (la forma limpia tipo ícono) normalizada 0..1
+    const BOLT = [[0.58,0.03],[0.12,0.56],[0.42,0.56],[0.33,0.97],[0.9,0.36],[0.55,0.36]];
+
+    // RAYO PRINCIPAL: la forma geométrica trazada con bordes eléctricos que crepitan
     const stage = document.getElementById('boltStage');
-    let mainBolt = null, mainTimer = 0, mainVisible = true;
+    let mainBolt = null, mainPoly = null, mainTimer = 0, mainVisible = true;
     function regenMain() {
         if (!stage) return;
         const r = stage.getBoundingClientRect();
         mainVisible = r.bottom > 0 && r.top < H;
         if (!mainVisible) return;
-        const cx0 = r.left + r.width * 0.5;
-        mainBolt = jag(cx0 + (Math.random() - 0.5) * 30, r.top + 10, cx0 + (Math.random() - 0.5) * 40, r.bottom - 10, 70, 0.5);
+        // Puntos de la silueta escalados a la caja del hero
+        const pts = BOLT.map(([nx, ny]) => [r.left + nx * r.width, r.top + ny * r.height]);
+        mainPoly = pts;
+        // Cada arista del contorno se vuelve un rayito dentado (pequeño desplazamiento) + chispas
+        mainBolt = [];
+        for (let i = 0; i < pts.length; i++) {
+            const a = pts[i], b = pts[(i + 1) % pts.length];
+            mainBolt.push(...jag(a[0], a[1], b[0], b[1], 12, 0.18));
+        }
     }
 
     // Relámpagos que cruzan la pantalla al azar
@@ -207,9 +217,22 @@ if (!reducedMotion) (function () {
     function frame(t) {
         cx.clearRect(0, 0, W, H);
 
-        // Rayo principal: regenera cada ~90ms para el titileo
+        // Rayo principal: regenera cada ~90ms para el titileo eléctrico
         if (t - mainTimer > 90) { regenMain(); mainTimer = t; }
-        if (mainBolt && mainVisible) drawStroke(mainBolt, 0.85 + Math.random() * 0.15, 1);
+        if (mainBolt && mainVisible) {
+            // Relleno tenue para que se lea como rayo sólido
+            cx.save();
+            cx.globalAlpha = 0.5 + Math.random() * 0.12;
+            cx.beginPath();
+            mainPoly.forEach((p, i) => i ? cx.lineTo(p[0], p[1]) : cx.moveTo(p[0], p[1]));
+            cx.closePath();
+            cx.fillStyle = 'rgba(241,196,15,0.9)';
+            cx.shadowColor = '#f1c40f'; cx.shadowBlur = 30;
+            cx.fill();
+            cx.restore();
+            // Bordes eléctricos crepitando (mismo estilo que los rayitos del fondo)
+            drawStroke(mainBolt, 0.9 + Math.random() * 0.1, 1);
+        }
 
         // Relámpagos cruzando
         for (let i = strikes.length - 1; i >= 0; i--) {
