@@ -210,18 +210,18 @@ if (!reducedMotion) (function () {
         cx.lineCap = 'round'; cx.lineJoin = 'round';
 
         if (colorType === 'blue') {
-            // Glow azul exterior
-            cx.strokeStyle = 'rgba(100,200,255,0.5)'; cx.lineWidth = 14 * scale; cx.shadowColor = '#64c8ff'; cx.shadowBlur = 28;
+            // Glow dorado exterior
+            cx.strokeStyle = 'rgba(255,200,0,0.5)'; cx.lineWidth = 14 * scale; cx.shadowColor = '#ffc800'; cx.shadowBlur = 28;
             stroke(segs);
-            // Glow azul intenso
-            cx.strokeStyle = 'rgba(70,150,255,0.85)'; cx.lineWidth = 7 * scale; cx.shadowColor = '#4696ff'; cx.shadowBlur = 18;
+            // Glow dorado intenso
+            cx.strokeStyle = 'rgba(255,215,0,0.85)'; cx.lineWidth = 7 * scale; cx.shadowColor = '#ffd700'; cx.shadowBlur = 18;
             stroke(segs);
         } else {
-            // Default: azul cyan como los feeders
-            cx.strokeStyle = 'rgba(100,200,255,0.4)'; cx.lineWidth = 12 * scale; cx.shadowColor = '#64c8ff'; cx.shadowBlur = 22;
+            // Default: dorado/amarillo como los feeders
+            cx.strokeStyle = 'rgba(255,200,0,0.4)'; cx.lineWidth = 12 * scale; cx.shadowColor = '#ffc800'; cx.shadowBlur = 22;
             stroke(segs);
             // Línea interior más brillante
-            cx.strokeStyle = 'rgba(150,220,255,0.8)'; cx.lineWidth = 6 * scale; cx.shadowColor = '#96dcff'; cx.shadowBlur = 16;
+            cx.strokeStyle = 'rgba(255,240,100,0.8)'; cx.lineWidth = 6 * scale; cx.shadowColor = '#fff064'; cx.shadowBlur = 16;
             stroke(segs);
         }
         // Núcleo blanco brillante
@@ -274,27 +274,27 @@ if (!reducedMotion) (function () {
         }
     }
 
-    // Dibuja la silueta rellena con glow neón azul/cyan intenso
+    // Dibuja la silueta rellena con glow neón dorado/amarillo intenso
     function drawBoltFill(poly) {
         cx.save();
         cx.globalAlpha = 0.65 + Math.random() * 0.2;
         cx.beginPath();
         poly.forEach((p, i) => i ? cx.lineTo(p[0], p[1]) : cx.moveTo(p[0], p[1]));
         cx.closePath();
-        // Glow exterior cyan
-        cx.fillStyle = 'rgba(100,200,255,0.5)';
-        cx.shadowColor = '#64c8ff'; cx.shadowBlur = 50;
+        // Glow exterior dorado
+        cx.fillStyle = 'rgba(255,200,0,0.5)';
+        cx.shadowColor = '#ffc800'; cx.shadowBlur = 50;
         cx.fill();
-        // Núcleo azul intenso
+        // Núcleo amarillo intenso
         cx.globalAlpha = 0.9;
-        cx.fillStyle = 'rgba(70,150,255,0.8)';
-        cx.shadowColor = '#4696ff'; cx.shadowBlur = 35;
+        cx.fillStyle = 'rgba(255,215,0,0.85)';
+        cx.shadowColor = '#ffd700'; cx.shadowBlur = 35;
         cx.fill();
         // Contorno blanco brillante
         cx.globalAlpha = 0.95;
         cx.lineWidth = 3;
-        cx.strokeStyle = 'rgba(150,220,255,0.9)';
-        cx.shadowColor = '#96dcff'; cx.shadowBlur = 20;
+        cx.strokeStyle = 'rgba(255,240,100,0.95)';
+        cx.shadowColor = '#fff064'; cx.shadowBlur = 20;
         cx.stroke();
         cx.restore();
     }
