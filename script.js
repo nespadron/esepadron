@@ -234,8 +234,8 @@ if (!reducedMotion) (function () {
         cx.stroke();
     }
 
-    // Silueta del rayo — Diagonal punta de flecha simple y energético
-    const BOLT = [[0.6,0.05],[0.72,0.08],[0.78,0.22],[0.68,0.30],[0.75,0.50],[0.62,0.55],[0.70,0.80],[0.55,0.92],[0.52,0.98],[0.48,0.85],[0.38,0.52],[0.30,0.48],[0.38,0.25],[0.28,0.22]];
+    // Silueta del rayo — Exacta al rayo azul de referencia (punta de flecha diagonal)
+    const BOLT = [[0.58,0.0],[0.72,0.02],[0.80,0.18],[0.68,0.28],[0.76,0.48],[0.60,0.54],[0.68,0.78],[0.52,0.92],[0.48,1.0],[0.44,0.80],[0.32,0.54],[0.24,0.48],[0.32,0.28],[0.20,0.18]];
 
     // RAYO PRINCIPAL: silueta azul sólida "cargada" por rayos que llegan de afuera (efecto pararrayos)
     const stage = document.getElementById('boltStage');
