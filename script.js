@@ -174,195 +174,69 @@ if (window.Lenis && window.gsap && window.ScrollTrigger) {
     document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 }
 
-/* ===== RAYO REALISTA + RELÁMPAGOS (canvas) ===== */
-if (!reducedMotion) (function () {
-    const cv = document.getElementById('canvas-lightning');
-    const cx = cv.getContext('2d');
-    let W, H;
-    function size() { W = cv.width = window.innerWidth; H = cv.height = window.innerHeight; }
-    size();
-    window.addEventListener('resize', () => { if (window.innerWidth !== W) size(); else H = cv.height = window.innerHeight; }, { passive: true });
+/* ===== SISTEMA DE RAYO CINEMATOGRÁFICO ===== */
+window.addEventListener('DOMContentLoaded', () => {
+    if (!reducedMotion && typeof LightningEffect !== 'undefined') {
+        const lightning = new LightningEffect('canvas-lightning', 'boltStage');
 
-    // Genera un trazo de rayo dentado con desplazamiento del punto medio
-    function jag(x1, y1, x2, y2, disp, branchProb) {
-        let segs = [{ x1, y1, x2, y2 }];
-        for (let d = disp; d >= 4; d /= 2) {
-            const next = [];
-            for (const s of segs) {
-                const mx = (s.x1 + s.x2) / 2 + (Math.random() - 0.5) * d;
-                const my = (s.y1 + s.y2) / 2 + (Math.random() - 0.5) * d;
-                next.push({ x1: s.x1, y1: s.y1, x2: mx, y2: my });
-                next.push({ x1: mx, y1: my, x2: s.x2, y2: s.y2 });
-                if (Math.random() < branchProb) {
-                    const ang = Math.atan2(s.y2 - my, s.x2 - mx) + (Math.random() - 0.5) * 1.5;
-                    const len = d * 1.7;
-                    next.push({ x1: mx, y1: my, x2: mx + Math.cos(ang) * len, y2: my + Math.sin(ang) * len });
+        // Audio — se activa con la primera interacción (política de autoplay del navegador)
+        let electricSound = null;
+        if (typeof ElectricSound !== 'undefined') {
+            electricSound = new ElectricSound();
+            const unlockAudio = () => {
+                electricSound.resume();
+                electricSound.startAmbientHum();
+            };
+            document.addEventListener('pointerdown', unlockAudio, { once: true });
+        }
+
+        // Campo electromagnético
+        let emField = null;
+        if (typeof ElectromagneticField !== 'undefined') {
+            emField = new ElectromagneticField(lightning, 'canvas-lightning');
+        }
+
+        // Integración con scroll intensity
+        if (window.gsap && window.ScrollTrigger) {
+            ScrollTrigger.create({
+                trigger: '.hero', start: 'top top', end: 'bottom top',
+                onUpdate: self => {
+                    if (lightning) lightning.setIntensityFromScroll(0.7 + self.progress * 0.3);
                 }
-            }
-            segs = next;
-        }
-        return segs;
-    }
-
-    // Dibuja un trazo eléctrico con triple pasada (soporta colores)
-    function drawStroke(segs, alpha, scale, colorType = 'yellow') {
-        cx.globalAlpha = alpha;
-        cx.lineCap = 'round'; cx.lineJoin = 'round';
-
-        if (colorType === 'blue') {
-            // Glow dorado exterior
-            cx.strokeStyle = 'rgba(255,200,0,0.5)'; cx.lineWidth = 14 * scale; cx.shadowColor = '#ffc800'; cx.shadowBlur = 28;
-            stroke(segs);
-            // Glow dorado intenso
-            cx.strokeStyle = 'rgba(255,215,0,0.85)'; cx.lineWidth = 7 * scale; cx.shadowColor = '#ffd700'; cx.shadowBlur = 18;
-            stroke(segs);
-        } else {
-            // Default: dorado/amarillo como los feeders
-            cx.strokeStyle = 'rgba(255,200,0,0.4)'; cx.lineWidth = 12 * scale; cx.shadowColor = '#ffc800'; cx.shadowBlur = 22;
-            stroke(segs);
-            // Línea interior más brillante
-            cx.strokeStyle = 'rgba(255,240,100,0.8)'; cx.lineWidth = 6 * scale; cx.shadowColor = '#fff064'; cx.shadowBlur = 16;
-            stroke(segs);
-        }
-        // Núcleo blanco brillante
-        cx.strokeStyle = '#ffffff'; cx.lineWidth = 2 * scale; cx.shadowBlur = 6;
-        stroke(segs);
-    }
-    function stroke(segs) {
-        cx.beginPath();
-        for (const s of segs) { cx.moveTo(s.x1, s.y1); cx.lineTo(s.x2, s.y2); }
-        cx.stroke();
-    }
-
-    // Silueta del rayo — Exacta al rayo azul de referencia (punta de flecha diagonal)
-    const BOLT = [[0.58,0.0],[0.72,0.02],[0.80,0.18],[0.68,0.28],[0.76,0.48],[0.60,0.54],[0.68,0.78],[0.52,0.92],[0.48,1.0],[0.44,0.80],[0.32,0.54],[0.24,0.48],[0.32,0.28],[0.20,0.18]];
-
-    // RAYO PRINCIPAL: silueta azul sólida "cargada" por rayos que llegan de afuera (efecto pararrayos)
-    const stage = document.getElementById('boltStage');
-    let mainPoly = null, mainOutline = null, mainTimer = 0, outlineTimer = 0, mainVisible = true, stageRect = null;
-    function regenMain() {
-        if (!stage) return;
-        const r = stage.getBoundingClientRect();
-        stageRect = r;
-        mainVisible = r.bottom > 0 && r.top < H;
-        if (!mainVisible) return;
-
-        // Centro y escala con rotación
-        const ccx = r.left + r.width / 2;
-        const ccy = r.top + r.height / 2;
-        const angle = -0.3; // rotación diagonal (Flash-style)
-        const scaleX = r.width * 0.65;
-        const scaleY = r.height * 1.1; // elongado verticalmente
-
-        // Transformar puntos con rotación y escala (silueta estable)
-        mainPoly = BOLT.map(([nx, ny]) => {
-            const x = (nx - 0.5) * 2;
-            const y = (ny - 0.5) * 2;
-            const rx = x * Math.cos(angle) - y * Math.sin(angle);
-            const ry = x * Math.sin(angle) + y * Math.cos(angle);
-            return [ccx + rx * scaleX * 0.5, ccy + ry * scaleY * 0.5];
-        });
-    }
-
-    // Contorno crepitante sobre la silueta estable (textura eléctrica)
-    function regenOutline() {
-        if (!mainPoly) return;
-        mainOutline = [];
-        for (let i = 0; i < mainPoly.length; i++) {
-            const a = mainPoly[i], b = mainPoly[(i + 1) % mainPoly.length];
-            mainOutline.push(...jag(a[0], a[1], b[0], b[1], 6, 0.08));
-        }
-    }
-
-    // Dibuja la silueta rellena con glow neón dorado/amarillo intenso
-    function drawBoltFill(poly) {
-        cx.save();
-        cx.globalAlpha = 0.65 + Math.random() * 0.2;
-        cx.beginPath();
-        poly.forEach((p, i) => i ? cx.lineTo(p[0], p[1]) : cx.moveTo(p[0], p[1]));
-        cx.closePath();
-        // Glow exterior dorado
-        cx.fillStyle = 'rgba(255,200,0,0.5)';
-        cx.shadowColor = '#ffc800'; cx.shadowBlur = 50;
-        cx.fill();
-        // Núcleo amarillo intenso
-        cx.globalAlpha = 0.9;
-        cx.fillStyle = 'rgba(255,215,0,0.85)';
-        cx.shadowColor = '#ffd700'; cx.shadowBlur = 35;
-        cx.fill();
-        // Contorno blanco brillante
-        cx.globalAlpha = 0.95;
-        cx.lineWidth = 3;
-        cx.strokeStyle = 'rgba(255,240,100,0.95)';
-        cx.shadowColor = '#fff064'; cx.shadowBlur = 20;
-        cx.stroke();
-        cx.restore();
-    }
-
-    // Rayos alimentadores: llegan de afuera hacia la silueta, como un pararrayos cargándose
-    const feeders = [];
-    function spawnFeeder() {
-        if (!mainPoly || !stageRect) return;
-        const dest = mainPoly[Math.floor(Math.random() * mainPoly.length)];
-        const ccx = stageRect.left + stageRect.width / 2;
-        const ccy = stageRect.top + stageRect.height / 2;
-        const ang = Math.atan2(dest[1] - ccy, dest[0] - ccx) + (Math.random() - 0.5) * 0.7;
-        const dist = Math.max(stageRect.width, stageRect.height) * (0.9 + Math.random() * 0.7);
-        const srcX = dest[0] + Math.cos(ang) * dist;
-        const srcY = dest[1] + Math.sin(ang) * dist;
-        feeders.push({ segs: jag(srcX, srcY, dest[0], dest[1], 22, 0.3), life: 1 });
-    }
-
-    // Relámpagos que cruzan la pantalla al azar (amarillos y azules)
-    const strikes = [];
-    function strike() {
-        const fromLeft = Math.random() < 0.5;
-        const isBlue = Math.random() < 0.4;
-        strikes.push({
-            segs: jag(fromLeft ? 0 : W, Math.random() * H * 0.5, Math.random() * W, H * (0.4 + Math.random() * 0.6), 130, 0.4),
-            life: 1,
-            color: isBlue ? 'blue' : 'yellow'
-        });
-    }
-
-    function frame(t) {
-        cx.clearRect(0, 0, W, H);
-
-        // Posición/visibilidad de la silueta: se recalcula cada ~200ms (estable, sin temblar)
-        if (t - mainTimer > 200) { regenMain(); mainTimer = t; }
-        // Contorno crepitante: se regenera más seguido para dar textura eléctrica
-        if (t - outlineTimer > 90) { regenOutline(); outlineTimer = t; }
-
-        if (mainPoly && mainVisible) {
-            drawBoltFill(mainPoly);
-            if (mainOutline) drawStroke(mainOutline, 0.85 + Math.random() * 0.15, 0.8, 'blue');
+            });
         }
 
-        // Rayos alimentadores llegando de afuera (efecto pararrayos cargándose)
-        if (mainVisible && Math.random() < 0.18) spawnFeeder();
-        for (let i = feeders.length - 1; i >= 0; i--) {
-            const f = feeders[i];
-            drawStroke(f.segs, f.life, 0.7, 'blue');
-            f.life -= 0.15;
-            if (f.life <= 0) feeders.splice(i, 1);
+        // Componentes adicionales
+        if (typeof CustomCursor !== 'undefined') {
+            const cursor = new CustomCursor(lightning);
+            const originalRender = lightning.render.bind(lightning);
+
+            lightning.render = function() {
+                originalRender();
+                cursor.draw(lightning.ctx);
+                if (emField) emField.draw();
+            };
         }
 
-        // Relámpagos cruzando (ambiente general de la página)
-        for (let i = strikes.length - 1; i >= 0; i--) {
-            const s = strikes[i];
-            cx.save();
-            drawStroke(s.segs, s.life * 0.9, 0.8, s.color);
-            cx.restore();
-            s.life -= 0.12;
-            if (s.life <= 0) strikes.splice(i, 1);
+        // Partículas flotantes (mismo canvas, se dibujan tras el rayo)
+        if (typeof ParticlesEffect !== 'undefined') {
+            new ParticlesEffect('canvas-lightning');
         }
-        cx.globalAlpha = 1; cx.shadowBlur = 0;
 
-        const intensity = window.__boltIntensity || 0;
-        if (Math.random() < 0.03 + intensity * 0.1) strike();
-        requestAnimationFrame(frame);
+        // Descargas interactivas en botones, textos y clicks
+        if (typeof InteractionEffects !== 'undefined') {
+            new InteractionEffects(lightning, 'canvas-lightning');
+        }
+
+        // Eventos de sonido
+        if (electricSound) {
+            document.addEventListener('click', () => electricSound.discharge());
+            document.querySelectorAll('.btn-primary, .btn-outline').forEach(btn => {
+                btn.addEventListener('mouseenter', () => electricSound.spark(btn.getBoundingClientRect().x, btn.getBoundingClientRect().y));
+            });
+        }
+
+        window.lightningEffect = lightning;
+        window.electricSound = electricSound;
     }
-    requestAnimationFrame(frame);
-    setTimeout(strike, 500);
-    setTimeout(spawnFeeder, 300);
-})();
+});
