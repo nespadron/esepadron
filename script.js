@@ -76,16 +76,16 @@ if (!reducedMotion) (function () {
                 const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < DIST) {
-                    const a = (1 - dist / DIST) * 0.12;
-                    cx.strokeStyle = `rgba(241,196,15,${a.toFixed(2)})`;
-                    cx.lineWidth = 0.6;
+                    const a = (1 - dist / DIST) * 0.15;
+                    cx.strokeStyle = `rgba(255,217,0,${a.toFixed(2)})`;
+                    cx.lineWidth = 1;
                     cx.beginPath(); cx.moveTo(pts[i].x, pts[i].y); cx.lineTo(pts[j].x, pts[j].y); cx.stroke();
                 }
             }
         }
         for (const p of pts) {
             cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            cx.fillStyle = p.spark ? 'rgba(255,217,0,0.85)' : 'rgba(241,196,15,0.4)';
+            cx.fillStyle = p.spark ? 'rgba(255,217,0,0.95)' : 'rgba(255,217,0,0.7)';
             cx.fill();
         }
         requestAnimationFrame(frame);
@@ -168,16 +168,26 @@ if (!reducedMotion) (function () {
         return segs;
     }
 
-    // Dibuja un trazo eléctrico con triple pasada
-    function drawStroke(segs, alpha, scale) {
+    // Dibuja un trazo eléctrico con triple pasada (soporta colores)
+    function drawStroke(segs, alpha, scale, colorType = 'yellow') {
         cx.globalAlpha = alpha;
         cx.lineCap = 'round'; cx.lineJoin = 'round';
-        // Glow azul base
-        cx.strokeStyle = 'rgba(95,163,255,0.4)'; cx.lineWidth = 12 * scale; cx.shadowColor = '#5fa3ff'; cx.shadowBlur = 20;
-        stroke(segs);
-        // Glow amarillo medio
-        cx.strokeStyle = 'rgba(255,217,0,0.8)'; cx.lineWidth = 6 * scale; cx.shadowColor = '#ffd900'; cx.shadowBlur = 12;
-        stroke(segs);
+
+        if (colorType === 'blue') {
+            // Glow azul base
+            cx.strokeStyle = 'rgba(95,163,255,0.5)'; cx.lineWidth = 14 * scale; cx.shadowColor = '#5fa3ff'; cx.shadowBlur = 24;
+            stroke(segs);
+            // Glow azul más saturado
+            cx.strokeStyle = 'rgba(100,200,255,0.8)'; cx.lineWidth = 7 * scale; cx.shadowColor = '#64c8ff'; cx.shadowBlur = 14;
+            stroke(segs);
+        } else {
+            // Glow azul base (amarillo)
+            cx.strokeStyle = 'rgba(95,163,255,0.4)'; cx.lineWidth = 12 * scale; cx.shadowColor = '#5fa3ff'; cx.shadowBlur = 20;
+            stroke(segs);
+            // Glow amarillo medio
+            cx.strokeStyle = 'rgba(255,217,0,0.9)'; cx.lineWidth = 6 * scale; cx.shadowColor = '#ffd900'; cx.shadowBlur = 14;
+            stroke(segs);
+        }
         // Núcleo blanco brillante
         cx.strokeStyle = '#ffffff'; cx.lineWidth = 2 * scale; cx.shadowBlur = 6;
         stroke(segs);
@@ -226,24 +236,33 @@ if (!reducedMotion) (function () {
         // Rayo principal con bordes
         for (let i = 0; i < pts.length; i++) {
             const a = pts[i], b = pts[(i + 1) % pts.length];
-            mainBolt.push(...jag(a[0], a[1], b[0], b[1], 14, 0.22));
+            mainBolt.push(...jag(a[0], a[1], b[0], b[1], 16, 0.25));
         }
 
-        // Rayos secundarios internos (bifurcaciones)
-        if (Math.random() < 0.6) {
-            const splitPoint = Math.floor(Math.random() * pts.length);
-            const a = pts[splitPoint];
-            const offX = (Math.random() - 0.5) * r.width * 0.3;
-            const offY = (Math.random() - 0.5) * r.height * 0.4;
-            mainBolt.push(...jag(a[0], a[1], a[0] + offX, a[1] + offY, 10, 0.35));
+        // Múltiples bifurcaciones internas (como en la imagen)
+        for (let b = 0; b < 6; b++) {
+            if (Math.random() < 0.75) {
+                const splitPoint = Math.floor(Math.random() * pts.length);
+                const a = pts[splitPoint];
+                const angle = (Math.random() * Math.PI * 2);
+                const len = (Math.random() + 0.5) * r.height * 0.4;
+                const endX = a[0] + Math.cos(angle) * len;
+                const endY = a[1] + Math.sin(angle) * len;
+                mainBolt.push(...jag(a[0], a[1], endX, endY, 10, 0.4));
+            }
         }
     }
 
-    // Relámpagos que cruzan la pantalla al azar
+    // Relámpagos que cruzan la pantalla al azar (amarillos y azules)
     const strikes = [];
     function strike() {
         const fromLeft = Math.random() < 0.5;
-        strikes.push({ segs: jag(fromLeft ? 0 : W, Math.random() * H * 0.5, Math.random() * W, H * (0.4 + Math.random() * 0.6), 130, 0.4), life: 1 });
+        const isBlue = Math.random() < 0.4;
+        strikes.push({
+            segs: jag(fromLeft ? 0 : W, Math.random() * H * 0.5, Math.random() * W, H * (0.4 + Math.random() * 0.6), 130, 0.4),
+            life: 1,
+            color: isBlue ? 'blue' : 'yellow'
+        });
     }
 
     function frame(t) {
@@ -261,7 +280,7 @@ if (!reducedMotion) (function () {
         for (let i = strikes.length - 1; i >= 0; i--) {
             const s = strikes[i];
             cx.save();
-            drawStroke(s.segs, s.life * 0.9, 0.8);
+            drawStroke(s.segs, s.life * 0.9, 0.8, s.color);
             cx.restore();
             s.life -= 0.12;
             if (s.life <= 0) strikes.splice(i, 1);
@@ -269,7 +288,7 @@ if (!reducedMotion) (function () {
         cx.globalAlpha = 1; cx.shadowBlur = 0;
 
         const intensity = window.__boltIntensity || 0;
-        if (Math.random() < 0.02 + intensity * 0.08) strike();
+        if (Math.random() < 0.03 + intensity * 0.1) strike();
         requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);

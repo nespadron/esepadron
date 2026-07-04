@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d1526">
+    <meta name="description" content="Sobre ESEPADRÓN: más de 20 años en servicios eléctricos industriales en baja y media tensión. Misión, visión, equipo directivo y valores.">
+    <title>Nosotros | ESEPADRÓN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="img/rayo.png">
+    <link rel="stylesheet" href="styles.css?v=3">
+</head>
+<body>
+
+<div id="scroll-progress" aria-hidden="true"></div>
+<canvas id="canvas-grid" aria-hidden="true"></canvas>
+<canvas id="canvas-lightning" aria-hidden="true"></canvas>
+
+<header class="navbar">
+    <a href="index.html" class="logo">
+        <img src="img/esepadronlogo2-300x218.png" alt="ESEPADRÓN" class="logo-img">
+        <span class="logo-text">Equipos y Servicios Eléctricos Padrón</span>
+    </a>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="nosotros.html">Nosotros</a></li>
+            <li><a href="index.html#servicios">Servicios</a></li>
+            <li><a href="proyectos.html">Proyectos</a></li>
+            <li><a href="index.html#contacto" class="nav-cta">Contacto</a></li>
+        </ul>
+    </nav>
+    <div class="burger" aria-label="Menu"><div></div><div></div><div></div></div>
+</header>
+
+<main>
+
+<!-- ===== HERO SECUNDARIO ===== -->
+<section class="hero-sub-page" id="inicio">
+    <div class="hero-content">
+        <div class="hero-eyebrow">Sobre nosotros</div>
+        <h1>Más de 20 años de experiencia en <span class="h1-accent">servicios eléctricos industriales.</span></h1>
+    </div>
+    <div class="bolt-stage" id="boltStage" aria-hidden="true"></div>
+</section>
+
+<!-- ===== NUESTRA EMPRESA ===== -->
+<section class="section">
+    <div class="section-label">Nuestra empresa</div>
+    <h2 class="reveal">Equipos y Servicios Eléctricos Padrón</h2>
+    <p class="section-sub reveal">
+        Somos una empresa especializada en el mantenimiento y pruebas a equipos de suministro
+        eléctrico en media y baja tensión. Contamos con personal altamente capacitado y equipos
+        de última generación para garantizar la seguridad y eficiencia de sus instalaciones
+        eléctricas industriales.
+    </p>
+</section>
+
+<!-- ===== MISIÓN / VISIÓN ===== -->
+<section class="section">
+    <div class="cards">
+        <article class="card reveal">
+            <div class="mv-icon"><i class="fas fa-bullseye"></i></div>
+            <h3>Misión</h3>
+            <p>Desarrollar un nivel de servicio de acuerdo a las exigencias actuales para ser competitivos en el mercado eléctrico.</p>
+        </article>
+        <article class="card reveal" style="transition-delay:.1s">
+            <div class="mv-icon"><i class="fas fa-eye"></i></div>
+            <h3>Visión</h3>
+            <p>Ser una empresa con principios sólidos en el área técnica, en la cual la atención al cliente sea la mayor prioridad, para lograr un crecimiento firme y con calidad.</p>
+        </article>
+    </div>
+</section>
+
+<!-- ===== EQUIPO DIRECTIVO ===== -->
+<section class="section">
+    <div class="section-label">Equipo directivo</div>
+    <h2 class="reveal">Quién dirige ESEPADRÓN</h2>
+    <p class="section-sub reveal">
+        La dirección de ESEPADRÓN está conformada por profesionales con amplia experiencia en el
+        sector eléctrico industrial, responsables de la coordinación técnica, administrativa y
+        operativa de los proyectos.
+    </p>
+    <div class="cards">
+        <article class="card team reveal">
+            <div class="team-avatar"><i class="fas fa-user-tie"></i></div>
+            <h3>Ing. Alfredo Padrón Cervantes</h3>
+            <p class="card-label">Gerente General</p>
+        </article>
+        <article class="card team reveal" style="transition-delay:.1s">
+            <div class="team-avatar"><i class="fas fa-user-tie"></i></div>
+            <h3>Lic. Miguel Ángel Padrón Cervantes</h3>
+            <p class="card-label">Gerente Administrativo</p>
+        </article>
+        <article class="card team reveal" style="transition-delay:.2s">
+            <div class="team-avatar"><i class="fas fa-user-tie"></i></div>
+            <h3>Ing. Alfredo Padrón Nañez</h3>
+            <p class="card-label">Gerente Operativo</p>
+        </article>
+    </div>
+</section>
+
+<!-- ===== VALORES ===== -->
+<section class="section">
+    <div class="section-label">Nuestros valores</div>
+    <h2 class="reveal">Lo que nos define</h2>
+    <div class="cards">
+        <article class="card compliance reveal">
+            <div class="mv-icon"><i class="fas fa-shield-halved"></i></div>
+            <h3>Seguridad</h3><p>Prioritaria en cada proyecto.</p>
+        </article>
+        <article class="card compliance reveal" style="transition-delay:.08s">
+            <div class="mv-icon"><i class="fas fa-award"></i></div>
+            <h3>Calidad</h3><p>Cumplimiento normativo total.</p>
+        </article>
+        <article class="card compliance reveal" style="transition-delay:.16s">
+            <div class="mv-icon"><i class="fas fa-handshake"></i></div>
+            <h3>Compromiso</h3><p>Con nuestros clientes.</p>
+        </article>
+        <article class="card compliance reveal" style="transition-delay:.24s">
+            <div class="mv-icon"><i class="fas fa-bolt"></i></div>
+            <h3>Experiencia</h3><p>Desde antes de 2007.</p>
+        </article>
+    </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="section contact" style="text-align:center">
+    <h2 class="reveal">¿Trabajamos juntos?</h2>
+    <p class="section-sub reveal" style="margin:0 auto 2rem">Solicita tu diagnóstico eléctrico con nuestro equipo técnico.</p>
+    <a href="index.html#contacto" class="btn-primary">Contáctanos →</a>
+</section>
+
+</main>
+
+<footer>
+    <div class="footer-inner">
+        <img class="footer-logo" src="img/esepadronlogo2-300x218.png" alt="ESEPADRÓN">
+        <div class="footer-info">
+            <p><i class="fas fa-map-marker-alt"></i> Arandas #22, Col. Colegio del Aire, C.P. 45200 Zapopan, Jal.</p>
+            <p><i class="fas fa-phone-alt"></i> <a href="tel:+523336240330">333-624-0330</a> &nbsp;·&nbsp; <i class="fas fa-envelope"></i> <a href="mailto:servicios@esepadron.com">servicios@esepadron.com</a></p>
+        </div>
+    </div>
+    <p class="footer-copy">© 2026 ESEPADRÓN S.A. de C.V. · Servicios eléctricos industriales · Zapopan, Jalisco</p>
+</footer>
+
+<script src="libs/gsap.min.js"></script>
+<script src="libs/ScrollTrigger.min.js"></script>
+<script src="libs/lenis.min.js"></script>
+<script src="script.js?v=3"></script>
+</body>
+</html>

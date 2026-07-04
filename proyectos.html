@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d1526">
+    <meta name="description" content="Proyectos y experiencia en campo de ESEPADRÓN: mantenimiento, pruebas y diagnóstico eléctrico en baja y media tensión.">
+    <title>Proyectos | ESEPADRÓN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="img/rayo.png">
+    <link rel="stylesheet" href="styles.css?v=3">
+</head>
+<body>
+
+<div id="scroll-progress" aria-hidden="true"></div>
+<canvas id="canvas-grid" aria-hidden="true"></canvas>
+<canvas id="canvas-lightning" aria-hidden="true"></canvas>
+
+<header class="navbar">
+    <a href="index.html" class="logo">
+        <img src="img/esepadronlogo2-300x218.png" alt="ESEPADRÓN" class="logo-img">
+        <span class="logo-text">Equipos y Servicios Eléctricos Padrón</span>
+    </a>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="nosotros.html">Nosotros</a></li>
+            <li><a href="index.html#servicios">Servicios</a></li>
+            <li><a href="proyectos.html">Proyectos</a></li>
+            <li><a href="index.html#contacto" class="nav-cta">Contacto</a></li>
+        </ul>
+    </nav>
+    <div class="burger" aria-label="Menu"><div></div><div></div><div></div></div>
+</header>
+
+<main>
+
+<section class="hero-sub-page" id="inicio">
+    <div class="hero-content">
+        <div class="hero-eyebrow">Proyectos</div>
+        <h1>Experiencia <span class="h1-accent">en campo.</span></h1>
+        <p class="hero-sub">
+            A lo largo de más de 20 años de operación, ESEPADRÓN ha participado en proyectos de
+            mantenimiento, diagnóstico y mejora de instalaciones eléctricas industriales en
+            distintos sectores.
+        </p>
+    </div>
+    <div class="bolt-stage" id="boltStage" aria-hidden="true"></div>
+</section>
+
+<section class="section">
+    <div class="filter-bar reveal">
+        <button class="filter-btn active" data-filter="all">Todos</button>
+        <button class="filter-btn" data-filter="baja">Baja tensión</button>
+        <button class="filter-btn" data-filter="media">Media tensión</button>
+        <button class="filter-btn" data-filter="pruebas">Pruebas eléctricas</button>
+    </div>
+    <div class="proj-grid" id="projGrid">
+        <figure class="proj-card reveal" data-cat="baja">
+            <img src="img/proyecto-bt-01.jpg" alt="Mantenimiento preventivo a transformador seco en baja tensión." loading="lazy">
+            <figcaption>Mantenimiento preventivo a transformador seco en baja tensión.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="baja">
+            <img src="img/proyecto-bt-02.jpg" alt="Prueba de resistencia de aislamiento a transformador seco en baja tensión." loading="lazy">
+            <figcaption>Prueba de resistencia de aislamiento a transformador seco en baja tensión.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="baja">
+            <img src="img/proyecto-bt-03.jpg" alt="Mantenimiento preventivo a tableros autosoportados en baja tensión." loading="lazy">
+            <figcaption>Mantenimiento preventivo a tableros autosoportados en baja tensión.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="baja">
+            <img src="img/proyecto-bt-04.jpg" alt="Mantenimiento preventivo a tableros autosoportados en baja tensión." loading="lazy">
+            <figcaption>Mantenimiento preventivo a tableros autosoportados en baja tensión.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="baja">
+            <img src="img/proyecto-bt-05.jpeg" alt="Reapriete de cableado de interruptores derivados en tablero autosoportado en baja tensión." loading="lazy">
+            <figcaption>Reapriete de cableado de interruptores derivados en tablero autosoportado en baja tensión.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="baja">
+            <img src="img/proyecto-bt-06.jpeg" alt="Mantenimiento preventivo a tablero PZ4 en baja tensión." loading="lazy">
+            <figcaption>Mantenimiento preventivo a tablero PZ4 en baja tensión.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="baja pruebas">
+            <img src="img/proyecto-bt-07.jpg" alt="Pruebas eléctricas a interruptor Masterpact M con Test Kit en baja tensión." loading="lazy">
+            <figcaption>Pruebas eléctricas a interruptor Masterpact M con Test Kit en baja tensión.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="baja pruebas">
+            <img src="img/proyecto-bt-08.jpg" alt="Pruebas eléctricas con Test-Kit a interruptor de la familia Powerpact en baja tensión." loading="lazy">
+            <figcaption>Pruebas eléctricas con Test-Kit a interruptor de la familia Powerpact en baja tensión.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="baja pruebas">
+            <img src="img/proyecto-bt-09.jpg" alt="Pruebas eléctricas a interruptor Masterpact NW con Test Kit en baja tensión." loading="lazy">
+            <figcaption>Pruebas eléctricas a interruptor Masterpact NW con Test Kit en baja tensión.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="baja pruebas">
+            <img src="img/proyecto-bt-10.jpeg" alt="Pruebas eléctricas a interruptor Masterpact MTZ con Test Kit en baja tensión." loading="lazy">
+            <figcaption>Pruebas eléctricas a interruptor Masterpact MTZ con Test Kit en baja tensión.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="baja">
+            <img src="img/proyecto-bt-11.jpeg" alt="Mantenimiento preventivo a interruptor electromagnético Masterpact NW en baja tensión." loading="lazy">
+            <figcaption>Mantenimiento preventivo a interruptor electromagnético Masterpact NW en baja tensión.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="baja">
+            <img src="img/proyecto-bt-12.jpeg" alt="Ajuste de protecciones a interruptor termomagnético en baja tensión." loading="lazy">
+            <figcaption>Ajuste de protecciones a interruptor termomagnético en baja tensión.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="baja">
+            <img src="img/proyecto-bt-13.jpeg" alt="Ajuste de protecciones a interruptor electromagnético en baja tensión." loading="lazy">
+            <figcaption>Ajuste de protecciones a interruptor electromagnético en baja tensión.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="baja">
+            <img src="img/proyecto-bt-14.jpg" alt="Cableado para control de bobina MN de interruptor Masterpact NW." loading="lazy">
+            <figcaption>Cableado para control de bobina MN de interruptor Masterpact NW.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="baja">
+            <img src="img/proyecto-bt-15.jpg" alt="Instalación de bobina MN en interruptor Masterpact NW." loading="lazy">
+            <figcaption>Instalación de bobina MN en interruptor Masterpact NW.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="baja">
+            <img src="img/proyecto-bt-16.jpg" alt="Mantenimiento preventivo a tablero I-Line en baja tensión." loading="lazy">
+            <figcaption>Mantenimiento preventivo a tablero I-Line en baja tensión.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="baja">
+            <img src="img/proyecto-bt-17.jpg" alt="Mantenimiento preventivo a tableros en baja tensión." loading="lazy">
+            <figcaption>Mantenimiento preventivo a tableros en baja tensión.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="media">
+            <img src="img/proyecto-mt-01.jpeg" alt="Mantenimiento preventivo a Subestación compacta SM6 en media tensión." loading="lazy">
+            <figcaption>Mantenimiento preventivo a Subestación compacta SM6 en media tensión.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="media">
+            <img src="img/proyecto-mt-02.jpeg" alt="Armado de Subestación compacta SM6 para maniobra y distribución en media tensión." loading="lazy">
+            <figcaption>Armado de Subestación compacta SM6 para maniobra y distribución en media tensión.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="media">
+            <img src="img/proyecto-mt-03.jpg" alt="Inserción de puntos de conexión en transformador en aceite para media tensión." loading="lazy">
+            <figcaption>Inserción de puntos de conexión en transformador en aceite para media tensión.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="media">
+            <img src="img/proyecto-mt-04.jpg" alt="Prueba de resistencia de aislamiento a transformador en aceite en media tensión." loading="lazy">
+            <figcaption>Prueba de resistencia de aislamiento a transformador en aceite en media tensión.</figcaption>
+        </figure>
+        <figure class="proj-card reveal" data-cat="media pruebas">
+            <img src="img/proyecto-mt-05.jpg" alt="Pruebas eléctricas de relación de transformación a transformador seco en media tensión." loading="lazy">
+            <figcaption>Pruebas eléctricas de relación de transformación a transformador seco en media tensión.</figcaption>
+        </figure>
+    </div>
+</section>
+
+<section class="section contact" style="text-align:center">
+    <h2 class="reveal">¿Tienes un proyecto similar?</h2>
+    <p class="section-sub reveal" style="margin:0 auto 2rem">Cuéntanos qué necesitas y te damos un diagnóstico.</p>
+    <a href="index.html#contacto" class="btn-primary">Solicitar cotización →</a>
+</section>
+
+</main>
+
+<footer>
+    <div class="footer-inner">
+        <img class="footer-logo" src="img/esepadronlogo2-300x218.png" alt="ESEPADRÓN">
+        <div class="footer-info">
+            <p><i class="fas fa-map-marker-alt"></i> Arandas #22, Col. Colegio del Aire, C.P. 45200 Zapopan, Jal.</p>
+            <p><i class="fas fa-phone-alt"></i> <a href="tel:+523336240330">333-624-0330</a> &nbsp;&middot;&nbsp; <i class="fas fa-envelope"></i> <a href="mailto:servicios@esepadron.com">servicios@esepadron.com</a></p>
+        </div>
+    </div>
+    <p class="footer-copy">&copy; 2026 ESEPADRÓN S.A. de C.V. &middot; Servicios eléctricos industriales &middot; Zapopan, Jalisco</p>
+</footer>
+
+<script src="libs/gsap.min.js"></script>
+<script src="libs/ScrollTrigger.min.js"></script>
+<script src="libs/lenis.min.js"></script>
+<script src="script.js?v=3"></script>
+</body>
+</html>
