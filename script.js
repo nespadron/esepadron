@@ -20,15 +20,24 @@ const SCOPE_NAMES = { 'acometida': 'Acometida', 'subestacion': 'Subestación', '
     const stage = document.getElementById('scopeStage');
     const list = document.getElementById('scopeList');
     const title = document.getElementById('scopeTitle');
+    const grid = document.querySelector('.energy-grid');
     if (!stage) return;
-    document.querySelectorAll('.energy-node').forEach(node => {
+    const nodes = document.querySelectorAll('.energy-node');
+    nodes.forEach(node => {
         node.addEventListener('click', () => {
             const id = node.dataset.scope;
-            document.querySelectorAll('.energy-node').forEach(n => n.classList.remove('active'));
-            node.classList.add('active');
+            nodes.forEach(n => {
+                n.classList.toggle('active', n === node);
+                n.classList.toggle('dimmed', n !== node);
+            });
             title.textContent = SCOPE_NAMES[id];
             list.innerHTML = SCOPES[id].map(x => `<li><i class="fas fa-bolt"></i> ${x}</li>`).join('');
             stage.hidden = false;
+            // Posicionar el conector alineado con el nodo seleccionado
+            const gridRect = grid.getBoundingClientRect();
+            const nodeRect = node.getBoundingClientRect();
+            const centerPercent = ((nodeRect.left + nodeRect.width / 2 - gridRect.left) / gridRect.width) * 100;
+            stage.style.setProperty('--arrow-pos', `${centerPercent}%`);
             stage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
     });
@@ -198,6 +207,39 @@ if (!reducedMotion) (function () {
         cx.stroke();
     }
 
+    // Dibuja el rayo principal como una nube de partículas azules y doradas
+    function drawParticleBolt(segs, alpha) {
+        cx.globalAlpha = alpha;
+        const dots = [];
+        for (const seg of segs) {
+            const dx = seg.x2 - seg.x1, dy = seg.y2 - seg.y1;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const steps = Math.ceil(dist / 5);
+            for (let i = 0; i <= steps; i++) {
+                const t = steps > 0 ? i / steps : 0;
+                const offset = (Math.random() - 0.5) * 10;
+                const perpX = -dy / (dist || 1), perpY = dx / (dist || 1);
+                const x = seg.x1 + dx * t + perpX * offset + (Math.random() - 0.5) * 5;
+                const y = seg.y1 + dy * t + perpY * offset + (Math.random() - 0.5) * 5;
+                dots.push({ x, y, r: Math.random() * 1.8 + 0.9, blue: Math.random() < 0.45 });
+            }
+        }
+        for (const p of dots) {
+            if (p.blue) {
+                cx.shadowColor = '#5fa3ff'; cx.shadowBlur = 14;
+                cx.fillStyle = 'rgba(95,163,255,0.8)';
+            } else {
+                cx.shadowColor = '#ffd900'; cx.shadowBlur = 12;
+                cx.fillStyle = 'rgba(255,217,0,0.85)';
+            }
+            cx.beginPath(); cx.arc(p.x, p.y, p.r * 2, 0, Math.PI * 2); cx.fill();
+
+            cx.shadowColor = '#ffffff'; cx.shadowBlur = 4;
+            cx.fillStyle = '#ffffff';
+            cx.beginPath(); cx.arc(p.x, p.y, p.r * 0.5, 0, Math.PI * 2); cx.fill();
+        }
+    }
+
     // Silueta del rayo GEOMÉTRICO — forma elongada tipo Flash, normalizada 0..1
     const BOLT = [[0.5,0.0],[0.35,0.25],[0.55,0.35],[0.3,0.5],[0.5,0.65],[0.25,0.8],[0.45,1.0],[0.7,0.75],[0.85,0.5],[0.65,0.3],[0.75,0.1]];
 
@@ -272,7 +314,7 @@ if (!reducedMotion) (function () {
         if (t - mainTimer > 40) { regenMain(); mainTimer = t; }
         if (mainBolt && mainVisible) {
             cx.save();
-            drawStroke(mainBolt, 0.85 + Math.random() * 0.15, 1);
+            drawParticleBolt(mainBolt, 0.9 + Math.random() * 0.1);
             cx.restore();
         }
 
