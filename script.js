@@ -168,45 +168,24 @@ if (!reducedMotion) (function () {
         return segs;
     }
 
-    // Dibuja el rayo como partículas de luz (puntos brillantes como los del fondo)
-    function drawParticleBolt(segs, alpha, scale) {
+    // Dibuja un trazo eléctrico con triple pasada
+    function drawStroke(segs, alpha, scale) {
         cx.globalAlpha = alpha;
-        // Generar puntos densamente a lo largo del trazo
-        const dots = [];
-        for (const seg of segs) {
-            const dx = seg.x2 - seg.x1, dy = seg.y2 - seg.y1;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            const steps = Math.ceil(dist / 4); // Más denso para mejor cobertura
-            for (let i = 0; i <= steps; i++) {
-                const t = steps > 0 ? i / steps : 0;
-                // Distribuir puntos en un ancho mayor alrededor del camino
-                for (let side = -1; side <= 1; side++) {
-                    const offset = side * (Math.random() * 8 + 4);
-                    const perpX = -dy / (dist || 1);
-                    const perpY = dx / (dist || 1);
-                    const x = seg.x1 + dx * t + perpX * offset + (Math.random() - 0.5) * 6;
-                    const y = seg.y1 + dy * t + perpY * offset + (Math.random() - 0.5) * 6;
-                    dots.push({ x, y, r: (Math.random() * 1.8 + 0.8) * scale });
-                }
-            }
-        }
-        // Dibujar puntos con glow progresivo (azul → amarillo → blanco)
-        for (const p of dots) {
-            // Glow azul claro (más grande)
-            cx.shadowColor = '#5fa3ff'; cx.shadowBlur = 16;
-            cx.fillStyle = 'rgba(95,163,255,0.25)';
-            cx.beginPath(); cx.arc(p.x, p.y, p.r * 2.2, 0, Math.PI * 2); cx.fill();
-
-            // Glow amarillo/oro
-            cx.shadowColor = '#ffd900'; cx.shadowBlur = 10;
-            cx.fillStyle = 'rgba(255,217,0,0.65)';
-            cx.beginPath(); cx.arc(p.x, p.y, p.r * 1.4, 0, Math.PI * 2); cx.fill();
-
-            // Núcleo blanco brillante
-            cx.shadowColor = '#ffffff'; cx.shadowBlur = 4;
-            cx.fillStyle = '#ffffff';
-            cx.beginPath(); cx.arc(p.x, p.y, p.r * 0.5, 0, Math.PI * 2); cx.fill();
-        }
+        cx.lineCap = 'round'; cx.lineJoin = 'round';
+        // Glow azul base
+        cx.strokeStyle = 'rgba(95,163,255,0.4)'; cx.lineWidth = 12 * scale; cx.shadowColor = '#5fa3ff'; cx.shadowBlur = 20;
+        stroke(segs);
+        // Glow amarillo medio
+        cx.strokeStyle = 'rgba(255,217,0,0.8)'; cx.lineWidth = 6 * scale; cx.shadowColor = '#ffd900'; cx.shadowBlur = 12;
+        stroke(segs);
+        // Núcleo blanco brillante
+        cx.strokeStyle = '#ffffff'; cx.lineWidth = 2 * scale; cx.shadowBlur = 6;
+        stroke(segs);
+    }
+    function stroke(segs) {
+        cx.beginPath();
+        for (const s of segs) { cx.moveTo(s.x1, s.y1); cx.lineTo(s.x2, s.y2); }
+        cx.stroke();
     }
 
     // Silueta del rayo GEOMÉTRICO — forma elongada tipo Flash, normalizada 0..1
@@ -270,12 +249,11 @@ if (!reducedMotion) (function () {
     function frame(t) {
         cx.clearRect(0, 0, W, H);
 
-        // Rayo principal: regenera cada ~90ms para el titileo eléctrico
-        if (t - mainTimer > 90) { regenMain(); mainTimer = t; }
+        // Rayo principal: regenera cada ~40ms para titileo rápido y eléctrico
+        if (t - mainTimer > 40) { regenMain(); mainTimer = t; }
         if (mainBolt && mainVisible) {
             cx.save();
-            // Dibujar el rayo como partículas
-            drawParticleBolt(mainBolt, 0.9 + Math.random() * 0.1, 1);
+            drawStroke(mainBolt, 0.85 + Math.random() * 0.15, 1);
             cx.restore();
         }
 
@@ -283,15 +261,15 @@ if (!reducedMotion) (function () {
         for (let i = strikes.length - 1; i >= 0; i--) {
             const s = strikes[i];
             cx.save();
-            drawParticleBolt(s.segs, s.life * 0.8, 0.8);
+            drawStroke(s.segs, s.life * 0.9, 0.8);
             cx.restore();
-            s.life -= 0.08;
+            s.life -= 0.12;
             if (s.life <= 0) strikes.splice(i, 1);
         }
         cx.globalAlpha = 1; cx.shadowBlur = 0;
 
         const intensity = window.__boltIntensity || 0;
-        if (Math.random() < 0.015 + intensity * 0.05) strike();
+        if (Math.random() < 0.02 + intensity * 0.08) strike();
         requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);

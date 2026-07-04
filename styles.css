@@ -20,7 +20,7 @@ html.lenis, html.lenis body { height: auto; }
 
 body {
     font-family: 'Montserrat', system-ui, sans-serif;
-    background: var(--bg);
+    background: #ffffff;
     color: var(--text);
     line-height: 1.6;
     overflow-x: hidden;
@@ -49,9 +49,9 @@ main, footer { position: relative; z-index: 10; }
     z-index: 1000;
     box-shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
-.logo { display: flex; align-items: center; gap: 0.6rem; }
+.logo { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; }
 .logo-bolt { width: 20px; height: 27px; fill: var(--yellow); filter: drop-shadow(0 0 6px var(--glow-y)); }
-.logo-text { font-size: 0.9rem; font-weight: 800; letter-spacing: 0.06em; color: var(--text); text-decoration: none; border: none; }
+.logo-text { font-size: 0.9rem; font-weight: 800; letter-spacing: 0.06em; color: var(--text); text-decoration: none !important; border: none; }
 .logo-text .accent { color: var(--yellow); }
 .nav-links { display: flex; gap: 2rem; list-style: none; align-items: center; }
 .nav-links a {
@@ -126,6 +126,10 @@ h1 {
 .btn-outline:hover { border-color: var(--yellow); color: var(--yellow); }
 
 @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+@keyframes bounceIn {
+    from { opacity: 0; transform: scale(0.8) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
 
 /* ===== ANCLA DEL RAYO REALISTA (el rayo se dibuja en el canvas) ===== */
 .bolt-stage {
@@ -197,6 +201,7 @@ h2 {
     border-radius: 12px; padding: 2rem 1.5rem; text-align: center; cursor: pointer;
     color: var(--text); font-family: inherit;
     transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
 }
 .energy-node:hover, .energy-node.active { border-color: var(--yellow); transform: translateY(-6px); box-shadow: 0 0 30px rgba(241,196,15,0.15); }
 .energy-node img { width: 80px; height: 80px; object-fit: contain; margin-bottom: 1rem; }
