@@ -17,21 +17,25 @@ const SCOPES = {
 };
 const SCOPE_NAMES = { 'acometida': 'Acometida', 'subestacion': 'Subestación', 'transformadores-mt': 'Transformadores MT', 'transformadores-bt': 'Transformadores BT', 'interruptores': 'Interruptores', 'tableros': 'Tableros' };
 (function () {
-    const stage = document.getElementById('scopeStage');
-    const list = document.getElementById('scopeList');
-    const title = document.getElementById('scopeTitle');
+    const stageTop = document.getElementById('scopeStageTop');
+    const stageBottom = document.getElementById('scopeStageBottom');
     const grid = document.querySelector('.energy-grid');
-    if (!stage) return;
+    if (!stageTop || !stageBottom) return;
     const nodes = document.querySelectorAll('.energy-node');
     nodes.forEach(node => {
         node.addEventListener('click', () => {
             const id = node.dataset.scope;
+            const isTop = node.dataset.row === 'top';
+            const stage = isTop ? stageTop : stageBottom;
+            const otherStage = isTop ? stageBottom : stageTop;
+            otherStage.hidden = true;
+
             nodes.forEach(n => {
                 n.classList.toggle('active', n === node);
                 n.classList.toggle('dimmed', n !== node);
             });
-            title.textContent = SCOPE_NAMES[id];
-            list.innerHTML = SCOPES[id].map(x => `<li><i class="fas fa-bolt"></i> ${x}</li>`).join('');
+            stage.querySelector('.scopeTitle').textContent = SCOPE_NAMES[id];
+            stage.querySelector('.scopeList').innerHTML = SCOPES[id].map(x => `<li><i class="fas fa-bolt"></i> ${x}</li>`).join('');
             stage.hidden = false;
             // Posicionar el conector alineado con el nodo seleccionado
             const gridRect = grid.getBoundingClientRect();
@@ -39,6 +43,27 @@ const SCOPE_NAMES = { 'acometida': 'Acometida', 'subestacion': 'Subestación', '
             const centerPercent = ((nodeRect.left + nodeRect.width / 2 - gridRect.left) / gridRect.width) * 100;
             stage.style.setProperty('--arrow-pos', `${centerPercent}%`);
             stage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+    });
+})();
+
+/* ===== FILTRO DE GALERÍA DE PROYECTOS ===== */
+(function () {
+    const bar = document.querySelector('.filter-bar');
+    const grid = document.getElementById('projGrid');
+    if (!bar || !grid) return;
+    const btns = bar.querySelectorAll('.filter-btn');
+    const cards = grid.querySelectorAll('.proj-card');
+    btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            btns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const filter = btn.dataset.filter;
+            cards.forEach(card => {
+                const cats = (card.dataset.cat || '').split(' ');
+                const show = filter === 'all' || cats.includes(filter);
+                card.classList.toggle('filtered-out', !show);
+            });
         });
     });
 })();
@@ -85,18 +110,20 @@ if (!reducedMotion) (function () {
                 const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < DIST) {
-                    const a = (1 - dist / DIST) * 0.15;
-                    cx.strokeStyle = `rgba(255,217,0,${a.toFixed(2)})`;
-                    cx.lineWidth = 1;
+                    const a = (1 - dist / DIST) * 0.28;
+                    cx.strokeStyle = `rgba(184,134,11,${a.toFixed(2)})`;
+                    cx.lineWidth = 1.1;
                     cx.beginPath(); cx.moveTo(pts[i].x, pts[i].y); cx.lineTo(pts[j].x, pts[j].y); cx.stroke();
                 }
             }
         }
         for (const p of pts) {
             cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            cx.fillStyle = p.spark ? 'rgba(255,217,0,0.95)' : 'rgba(255,217,0,0.7)';
+            cx.shadowColor = 'rgba(184,134,11,0.5)'; cx.shadowBlur = 3;
+            cx.fillStyle = p.spark ? 'rgba(230,170,0,1)' : 'rgba(200,148,0,0.9)';
             cx.fill();
         }
+        cx.shadowBlur = 0;
         requestAnimationFrame(frame);
     }
     frame();
@@ -207,92 +234,76 @@ if (!reducedMotion) (function () {
         cx.stroke();
     }
 
-    // Dibuja el rayo principal como una nube de partículas azules y doradas
-    function drawParticleBolt(segs, alpha) {
-        cx.globalAlpha = alpha;
-        const dots = [];
-        for (const seg of segs) {
-            const dx = seg.x2 - seg.x1, dy = seg.y2 - seg.y1;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            const steps = Math.ceil(dist / 5);
-            for (let i = 0; i <= steps; i++) {
-                const t = steps > 0 ? i / steps : 0;
-                const offset = (Math.random() - 0.5) * 10;
-                const perpX = -dy / (dist || 1), perpY = dx / (dist || 1);
-                const x = seg.x1 + dx * t + perpX * offset + (Math.random() - 0.5) * 5;
-                const y = seg.y1 + dy * t + perpY * offset + (Math.random() - 0.5) * 5;
-                dots.push({ x, y, r: Math.random() * 1.8 + 0.9, blue: Math.random() < 0.45 });
-            }
-        }
-        for (const p of dots) {
-            if (p.blue) {
-                cx.shadowColor = '#5fa3ff'; cx.shadowBlur = 14;
-                cx.fillStyle = 'rgba(95,163,255,0.8)';
-            } else {
-                cx.shadowColor = '#ffd900'; cx.shadowBlur = 12;
-                cx.fillStyle = 'rgba(255,217,0,0.85)';
-            }
-            cx.beginPath(); cx.arc(p.x, p.y, p.r * 2, 0, Math.PI * 2); cx.fill();
-
-            cx.shadowColor = '#ffffff'; cx.shadowBlur = 4;
-            cx.fillStyle = '#ffffff';
-            cx.beginPath(); cx.arc(p.x, p.y, p.r * 0.5, 0, Math.PI * 2); cx.fill();
-        }
-    }
-
-    // Silueta del rayo GEOMÉTRICO — forma elongada tipo Flash, normalizada 0..1
+    // Silueta del rayo — forma elongada tipo Flash, normalizada 0..1
     const BOLT = [[0.5,0.0],[0.35,0.25],[0.55,0.35],[0.3,0.5],[0.5,0.65],[0.25,0.8],[0.45,1.0],[0.7,0.75],[0.85,0.5],[0.65,0.3],[0.75,0.1]];
 
-    // RAYO PRINCIPAL: múltiples rayos formando una forma cohesiva, rotado y elongado
+    // RAYO PRINCIPAL: silueta azul sólida "cargada" por rayos que llegan de afuera (efecto pararrayos)
     const stage = document.getElementById('boltStage');
-    let mainBolt = null, mainPoly = null, mainTimer = 0, mainVisible = true;
+    let mainPoly = null, mainOutline = null, mainTimer = 0, outlineTimer = 0, mainVisible = true, stageRect = null;
     function regenMain() {
         if (!stage) return;
         const r = stage.getBoundingClientRect();
+        stageRect = r;
         mainVisible = r.bottom > 0 && r.top < H;
         if (!mainVisible) return;
 
         // Centro y escala con rotación
-        const cx = r.left + r.width / 2;
-        const cy = r.top + r.height / 2;
+        const ccx = r.left + r.width / 2;
+        const ccy = r.top + r.height / 2;
         const angle = -0.3; // rotación diagonal (Flash-style)
         const scaleX = r.width * 0.65;
         const scaleY = r.height * 1.1; // elongado verticalmente
 
-        // Transformar puntos con rotación y escala
-        const pts = BOLT.map(([nx, ny]) => {
-            // Centrar en 0.5, 0.5
+        // Transformar puntos con rotación y escala (silueta estable)
+        mainPoly = BOLT.map(([nx, ny]) => {
             const x = (nx - 0.5) * 2;
             const y = (ny - 0.5) * 2;
-            // Rotar
             const rx = x * Math.cos(angle) - y * Math.sin(angle);
             const ry = x * Math.sin(angle) + y * Math.cos(angle);
-            // Escalar y trasladar
-            return [cx + rx * scaleX * 0.5, cy + ry * scaleY * 0.5];
+            return [ccx + rx * scaleX * 0.5, ccy + ry * scaleY * 0.5];
         });
-        mainPoly = pts;
+    }
 
-        // Generar múltiples rayos dentro de la forma (efecto multibolt)
-        mainBolt = [];
-
-        // Rayo principal con bordes
-        for (let i = 0; i < pts.length; i++) {
-            const a = pts[i], b = pts[(i + 1) % pts.length];
-            mainBolt.push(...jag(a[0], a[1], b[0], b[1], 16, 0.25));
+    // Contorno crepitante sobre la silueta estable (textura eléctrica)
+    function regenOutline() {
+        if (!mainPoly) return;
+        mainOutline = [];
+        for (let i = 0; i < mainPoly.length; i++) {
+            const a = mainPoly[i], b = mainPoly[(i + 1) % mainPoly.length];
+            mainOutline.push(...jag(a[0], a[1], b[0], b[1], 6, 0.08));
         }
+    }
 
-        // Múltiples bifurcaciones internas (como en la imagen)
-        for (let b = 0; b < 6; b++) {
-            if (Math.random() < 0.75) {
-                const splitPoint = Math.floor(Math.random() * pts.length);
-                const a = pts[splitPoint];
-                const angle = (Math.random() * Math.PI * 2);
-                const len = (Math.random() + 0.5) * r.height * 0.4;
-                const endX = a[0] + Math.cos(angle) * len;
-                const endY = a[1] + Math.sin(angle) * len;
-                mainBolt.push(...jag(a[0], a[1], endX, endY, 10, 0.4));
-            }
-        }
+    // Dibuja la silueta rellena con glow neón azul, estilo "cargado"
+    function drawBoltFill(poly) {
+        cx.save();
+        cx.globalAlpha = 0.55 + Math.random() * 0.15;
+        cx.beginPath();
+        poly.forEach((p, i) => i ? cx.lineTo(p[0], p[1]) : cx.moveTo(p[0], p[1]));
+        cx.closePath();
+        cx.fillStyle = 'rgba(70,150,255,0.4)';
+        cx.shadowColor = '#5fa3ff'; cx.shadowBlur = 40;
+        cx.fill();
+        cx.globalAlpha = 0.95;
+        cx.lineWidth = 2.5;
+        cx.strokeStyle = '#cfe9ff';
+        cx.shadowColor = '#8ecbff'; cx.shadowBlur = 18;
+        cx.stroke();
+        cx.restore();
+    }
+
+    // Rayos alimentadores: llegan de afuera hacia la silueta, como un pararrayos cargándose
+    const feeders = [];
+    function spawnFeeder() {
+        if (!mainPoly || !stageRect) return;
+        const dest = mainPoly[Math.floor(Math.random() * mainPoly.length)];
+        const ccx = stageRect.left + stageRect.width / 2;
+        const ccy = stageRect.top + stageRect.height / 2;
+        const ang = Math.atan2(dest[1] - ccy, dest[0] - ccx) + (Math.random() - 0.5) * 0.7;
+        const dist = Math.max(stageRect.width, stageRect.height) * (0.9 + Math.random() * 0.7);
+        const srcX = dest[0] + Math.cos(ang) * dist;
+        const srcY = dest[1] + Math.sin(ang) * dist;
+        feeders.push({ segs: jag(srcX, srcY, dest[0], dest[1], 22, 0.3), life: 1 });
     }
 
     // Relámpagos que cruzan la pantalla al azar (amarillos y azules)
@@ -310,15 +321,26 @@ if (!reducedMotion) (function () {
     function frame(t) {
         cx.clearRect(0, 0, W, H);
 
-        // Rayo principal: regenera cada ~40ms para titileo rápido y eléctrico
-        if (t - mainTimer > 40) { regenMain(); mainTimer = t; }
-        if (mainBolt && mainVisible) {
-            cx.save();
-            drawParticleBolt(mainBolt, 0.9 + Math.random() * 0.1);
-            cx.restore();
+        // Posición/visibilidad de la silueta: se recalcula cada ~200ms (estable, sin temblar)
+        if (t - mainTimer > 200) { regenMain(); mainTimer = t; }
+        // Contorno crepitante: se regenera más seguido para dar textura eléctrica
+        if (t - outlineTimer > 90) { regenOutline(); outlineTimer = t; }
+
+        if (mainPoly && mainVisible) {
+            drawBoltFill(mainPoly);
+            if (mainOutline) drawStroke(mainOutline, 0.85 + Math.random() * 0.15, 0.8, 'blue');
         }
 
-        // Relámpagos cruzando
+        // Rayos alimentadores llegando de afuera (efecto pararrayos cargándose)
+        if (mainVisible && Math.random() < 0.18) spawnFeeder();
+        for (let i = feeders.length - 1; i >= 0; i--) {
+            const f = feeders[i];
+            drawStroke(f.segs, f.life, 0.7, 'blue');
+            f.life -= 0.15;
+            if (f.life <= 0) feeders.splice(i, 1);
+        }
+
+        // Relámpagos cruzando (ambiente general de la página)
         for (let i = strikes.length - 1; i >= 0; i--) {
             const s = strikes[i];
             cx.save();
@@ -335,4 +357,5 @@ if (!reducedMotion) (function () {
     }
     requestAnimationFrame(frame);
     setTimeout(strike, 500);
+    setTimeout(spawnFeeder, 300);
 })();

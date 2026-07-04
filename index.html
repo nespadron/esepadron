@@ -124,38 +124,46 @@
         distribución. <em>Toca un equipo para ver sus alcances.</em>
     </p>
     <div class="energy-grid">
-        <button class="energy-node reveal" data-scope="acometida" style="transition-delay:0s">
+        <button class="energy-node reveal" data-scope="acometida" data-row="top" style="transition-delay:0s">
             <img src="img/acometida.png" alt="Acometida" loading="lazy">
             <h4>Acometida principal</h4><span>Aérea y subterránea</span>
         </button>
-        <button class="energy-node reveal" data-scope="subestacion" style="transition-delay:0.1s">
+        <button class="energy-node reveal" data-scope="subestacion" data-row="top" style="transition-delay:0.1s">
             <img src="img/Subestacion.png" alt="Subestación" loading="lazy">
             <h4>Subestación</h4><span>Tripolar en aire / Gas SF6</span>
         </button>
-        <button class="energy-node reveal" data-scope="transformadores-mt" style="transition-delay:0.2s">
+        <button class="energy-node reveal" data-scope="transformadores-mt" data-row="top" style="transition-delay:0.2s">
             <img src="img/transformt.png" alt="Transformadores MT" loading="lazy">
             <h4>Transformadores MT</h4><span>Aceite y secos · Media tensión</span>
         </button>
-        <div class="scope-stage" id="scopeStage" hidden>
+        <div class="scope-stage" id="scopeStageTop" hidden>
             <div class="scope-connector" aria-hidden="true"><i class="fas fa-bolt"></i></div>
             <div class="scope-card">
-                <span class="scope-badge"><i class="fas fa-bolt"></i> <b id="scopeTitle"></b></span>
+                <span class="scope-badge"><i class="fas fa-bolt"></i> <b class="scopeTitle"></b></span>
                 <h4>Alcances del servicio</h4>
-                <ul id="scopeList"></ul>
+                <ul class="scopeList"></ul>
             </div>
         </div>
-        <button class="energy-node reveal" data-scope="transformadores-bt" style="transition-delay:0.3s">
+        <button class="energy-node reveal" data-scope="transformadores-bt" data-row="bottom" style="transition-delay:0.3s">
             <img src="img/transforbt.png" alt="Transformadores BT" loading="lazy">
             <h4>Transformadores BT</h4><span>Aceite y secos · Baja tensión</span>
         </button>
-        <button class="energy-node reveal" data-scope="interruptores" style="transition-delay:0.4s">
+        <button class="energy-node reveal" data-scope="interruptores" data-row="bottom" style="transition-delay:0.4s">
             <img src="img/interruptorp.png" alt="Interruptores de potencia" loading="lazy">
             <h4>Interruptores de potencia</h4><span>Masterpact · Powerpact · Compact · SACE</span>
         </button>
-        <button class="energy-node reveal" data-scope="tableros" style="transition-delay:0.5s">
+        <button class="energy-node reveal" data-scope="tableros" data-row="bottom" style="transition-delay:0.5s">
             <img src="img/tablerod.png" alt="Tableros de distribución" loading="lazy">
             <h4>Tableros de distribución</h4><span>Autosoportados · I-Line · NQ · NF · QO</span>
         </button>
+        <div class="scope-stage" id="scopeStageBottom" hidden>
+            <div class="scope-connector" aria-hidden="true"><i class="fas fa-bolt"></i></div>
+            <div class="scope-card">
+                <span class="scope-badge"><i class="fas fa-bolt"></i> <b class="scopeTitle"></b></span>
+                <h4>Alcances del servicio</h4>
+                <ul class="scopeList"></ul>
+            </div>
+        </div>
     </div>
 </section>
 
