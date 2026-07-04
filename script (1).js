@@ -84,7 +84,7 @@ if (!reducedMotion) (function () {
             x: Math.random() * W, y: Math.random() * H,
             vx: (Math.random() - 0.5) * 0.4,
             vy: (Math.random() - 0.5) * 0.4,
-            r: Math.random() * 2.5 + 1.5,
+            r: Math.random() * 1.6 + 0.7,
             spark: Math.random() < 0.15, // 15% nodos "chispa" más brillantes
         }));
     }
@@ -112,7 +112,7 @@ if (!reducedMotion) (function () {
                 if (dist < DIST) {
                     const a = (1 - dist / DIST) * 0.28;
                     cx.strokeStyle = `rgba(184,134,11,${a.toFixed(2)})`;
-                    cx.lineWidth = 1.8;
+                    cx.lineWidth = 1.1;
                     cx.beginPath(); cx.moveTo(pts[i].x, pts[i].y); cx.lineTo(pts[j].x, pts[j].y); cx.stroke();
                 }
             }
@@ -251,8 +251,8 @@ if (!reducedMotion) (function () {
         const ccx = r.left + r.width / 2;
         const ccy = r.top + r.height / 2;
         const angle = -0.3; // rotación diagonal (Flash-style)
-        const scaleX = r.width * 0.65;
-        const scaleY = r.height * 1.1; // elongado verticalmente
+        const scaleX = r.width * 0.35;
+        const scaleY = r.height * 0.65; // elongado verticalmente
 
         // Transformar puntos con rotación y escala (silueta estable)
         mainPoly = BOLT.map(([nx, ny]) => {
@@ -365,4 +365,27 @@ if (!reducedMotion) (function () {
     requestAnimationFrame(frame);
     setTimeout(strike, 500);
     setTimeout(spawnFeeder, 300);
+})();
+
+(function(){
+const cv=document.getElementById('heroLightningCanvas'); if(!cv)return;
+const ctx=cv.getContext('2d');
+function rs(){cv.width=cv.clientWidth||600;cv.height=cv.clientHeight||900;}
+window.addEventListener('resize',rs);rs();
+function bolt(){
+ ctx.clearRect(0,0,cv.width,cv.height);
+ let pts=[],x=cv.width*0.55,y=20;
+ pts.push([x,y]);
+ while(y<cv.height-20){x+=(Math.random()-.5)*35;y+=25+Math.random()*25;pts.push([x,y]);}
+ ctx.lineCap='round';
+ for(let g=18;g>1;g-=4){
+  ctx.strokeStyle=`rgba(255,215,80,${0.03*g})`;ctx.lineWidth=g;
+  ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.stroke();
+ }
+ ctx.strokeStyle='#fff8d0';ctx.lineWidth=3;
+ ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.stroke();
+ pts.forEach((p,i)=>{if(i<pts.length-2&&Math.random()<.7){ctx.beginPath();ctx.moveTo(...p);let bx=p[0]+(Math.random()-.5)*120,by=p[1]+40+Math.random()*60;ctx.lineTo(bx,by);ctx.strokeStyle='rgba(255,235,150,.8)';ctx.lineWidth=1;ctx.stroke();}});
+ requestAnimationFrame(bolt);
+}
+bolt();
 })();
