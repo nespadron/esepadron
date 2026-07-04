@@ -84,7 +84,7 @@ if (!reducedMotion) (function () {
             x: Math.random() * W, y: Math.random() * H,
             vx: (Math.random() - 0.5) * 0.4,
             vy: (Math.random() - 0.5) * 0.4,
-            r: Math.random() * 1.6 + 0.7,
+            r: Math.random() * 2.5 + 1.5,
             spark: Math.random() < 0.15, // 15% nodos "chispa" más brillantes
         }));
     }
@@ -112,7 +112,7 @@ if (!reducedMotion) (function () {
                 if (dist < DIST) {
                     const a = (1 - dist / DIST) * 0.28;
                     cx.strokeStyle = `rgba(184,134,11,${a.toFixed(2)})`;
-                    cx.lineWidth = 1.1;
+                    cx.lineWidth = 1.8;
                     cx.beginPath(); cx.moveTo(pts[i].x, pts[i].y); cx.lineTo(pts[j].x, pts[j].y); cx.stroke();
                 }
             }
