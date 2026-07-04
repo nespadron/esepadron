@@ -234,8 +234,8 @@ if (!reducedMotion) (function () {
         cx.stroke();
     }
 
-    // Silueta del rayo — Logo de Flash (forma icónica geométrica)
-    const BOLT = [[0.5,0.0],[0.65,0.0],[0.8,0.28],[0.55,0.38],[0.7,0.65],[0.45,0.58],[0.6,0.95],[0.5,1.0],[0.4,0.58],[0.25,0.65],[0.45,0.38],[0.2,0.28]];
+    // Silueta del rayo — Diagonal inclinado con forma punta de flecha limpia
+    const BOLT = [[0.55,0.05],[0.70,0.08],[0.75,0.20],[0.65,0.28],[0.72,0.45],[0.60,0.50],[0.68,0.70],[0.55,0.75],[0.62,0.92],[0.50,0.98],[0.48,0.80],[0.38,0.75],[0.42,0.55],[0.32,0.50],[0.38,0.30],[0.28,0.25],[0.35,0.10]];
 
     // RAYO PRINCIPAL: silueta azul sólida "cargada" por rayos que llegan de afuera (efecto pararrayos)
     const stage = document.getElementById('boltStage');
