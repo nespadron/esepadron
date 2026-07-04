@@ -76,16 +76,16 @@ if (!reducedMotion) (function () {
                 const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < DIST) {
-                    const a = (1 - dist / DIST) * 0.22;
+                    const a = (1 - dist / DIST) * 0.12;
                     cx.strokeStyle = `rgba(241,196,15,${a.toFixed(2)})`;
-                    cx.lineWidth = 1.8;
+                    cx.lineWidth = 0.6;
                     cx.beginPath(); cx.moveTo(pts[i].x, pts[i].y); cx.lineTo(pts[j].x, pts[j].y); cx.stroke();
                 }
             }
         }
         for (const p of pts) {
-            cx.beginPath(); cx.arc(p.x, p.y, p.r * 2.2, 0, Math.PI * 2);
-            cx.fillStyle = p.spark ? 'rgba(255,217,0,0.95)' : 'rgba(241,196,15,0.65)';
+            cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            cx.fillStyle = p.spark ? 'rgba(255,217,0,0.85)' : 'rgba(241,196,15,0.4)';
             cx.fill();
         }
         requestAnimationFrame(frame);
@@ -168,21 +168,45 @@ if (!reducedMotion) (function () {
         return segs;
     }
 
-    // Dibuja un trazo con triple pasada: glow azul, glow amarillo, núcleo blanco (look eléctrico real)
-    function drawStroke(segs, alpha, scale) {
+    // Dibuja el rayo como partículas de luz (puntos brillantes como los del fondo)
+    function drawParticleBolt(segs, alpha, scale) {
         cx.globalAlpha = alpha;
-        cx.lineCap = 'round'; cx.lineJoin = 'round';
-        cx.strokeStyle = 'rgba(120,180,255,0.5)'; cx.lineWidth = 7 * scale; cx.shadowColor = '#79b4ff'; cx.shadowBlur = 26;
-        stroke(segs);
-        cx.strokeStyle = 'rgba(241,196,15,0.95)'; cx.lineWidth = 3.5 * scale; cx.shadowColor = '#f1c40f'; cx.shadowBlur = 16;
-        stroke(segs);
-        cx.strokeStyle = '#ffffff'; cx.lineWidth = 1.3 * scale; cx.shadowBlur = 6;
-        stroke(segs);
-    }
-    function stroke(segs) {
-        cx.beginPath();
-        for (const s of segs) { cx.moveTo(s.x1, s.y1); cx.lineTo(s.x2, s.y2); }
-        cx.stroke();
+        // Generar puntos densamente a lo largo del trazo
+        const dots = [];
+        for (const seg of segs) {
+            const dx = seg.x2 - seg.x1, dy = seg.y2 - seg.y1;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const steps = Math.ceil(dist / 4); // Más denso para mejor cobertura
+            for (let i = 0; i <= steps; i++) {
+                const t = steps > 0 ? i / steps : 0;
+                // Distribuir puntos en un ancho mayor alrededor del camino
+                for (let side = -1; side <= 1; side++) {
+                    const offset = side * (Math.random() * 8 + 4);
+                    const perpX = -dy / (dist || 1);
+                    const perpY = dx / (dist || 1);
+                    const x = seg.x1 + dx * t + perpX * offset + (Math.random() - 0.5) * 6;
+                    const y = seg.y1 + dy * t + perpY * offset + (Math.random() - 0.5) * 6;
+                    dots.push({ x, y, r: (Math.random() * 1.8 + 0.8) * scale });
+                }
+            }
+        }
+        // Dibujar puntos con glow progresivo (azul → amarillo → blanco)
+        for (const p of dots) {
+            // Glow azul claro (más grande)
+            cx.shadowColor = '#5fa3ff'; cx.shadowBlur = 16;
+            cx.fillStyle = 'rgba(95,163,255,0.25)';
+            cx.beginPath(); cx.arc(p.x, p.y, p.r * 2.2, 0, Math.PI * 2); cx.fill();
+
+            // Glow amarillo/oro
+            cx.shadowColor = '#ffd900'; cx.shadowBlur = 10;
+            cx.fillStyle = 'rgba(255,217,0,0.65)';
+            cx.beginPath(); cx.arc(p.x, p.y, p.r * 1.4, 0, Math.PI * 2); cx.fill();
+
+            // Núcleo blanco brillante
+            cx.shadowColor = '#ffffff'; cx.shadowBlur = 4;
+            cx.fillStyle = '#ffffff';
+            cx.beginPath(); cx.arc(p.x, p.y, p.r * 0.5, 0, Math.PI * 2); cx.fill();
+        }
     }
 
     // Silueta del rayo GEOMÉTRICO — forma elongada tipo Flash, normalizada 0..1
@@ -217,26 +241,22 @@ if (!reducedMotion) (function () {
         });
         mainPoly = pts;
 
-        // Generar múltiples rayos dentro de la forma (efecto multibolt tipo Flash)
+        // Generar múltiples rayos dentro de la forma (efecto multibolt)
         mainBolt = [];
 
-        // Rayo principal con bordes dentados
+        // Rayo principal con bordes
         for (let i = 0; i < pts.length; i++) {
             const a = pts[i], b = pts[(i + 1) % pts.length];
-            mainBolt.push(...jag(a[0], a[1], b[0], b[1], 16, 0.25));
+            mainBolt.push(...jag(a[0], a[1], b[0], b[1], 14, 0.22));
         }
 
-        // Múltiples rayos secundarios en varias direcciones (como electricidad/Flash)
-        for (let b = 0; b < 4; b++) {
-            if (Math.random() < 0.8) {
-                const splitPoint = Math.floor(Math.random() * pts.length);
-                const a = pts[splitPoint];
-                const angle = (Math.random() * Math.PI * 2);
-                const len = (Math.random() + 0.8) * r.height * 0.5;
-                const endX = a[0] + Math.cos(angle) * len;
-                const endY = a[1] + Math.sin(angle) * len;
-                mainBolt.push(...jag(a[0], a[1], endX, endY, 12, 0.4));
-            }
+        // Rayos secundarios internos (bifurcaciones)
+        if (Math.random() < 0.6) {
+            const splitPoint = Math.floor(Math.random() * pts.length);
+            const a = pts[splitPoint];
+            const offX = (Math.random() - 0.5) * r.width * 0.3;
+            const offY = (Math.random() - 0.5) * r.height * 0.4;
+            mainBolt.push(...jag(a[0], a[1], a[0] + offX, a[1] + offY, 10, 0.35));
         }
     }
 
@@ -253,24 +273,18 @@ if (!reducedMotion) (function () {
         // Rayo principal: regenera cada ~90ms para el titileo eléctrico
         if (t - mainTimer > 90) { regenMain(); mainTimer = t; }
         if (mainBolt && mainVisible) {
-            // Relleno tenue para que se lea como rayo sólido
             cx.save();
-            cx.globalAlpha = 0.5 + Math.random() * 0.12;
-            cx.beginPath();
-            mainPoly.forEach((p, i) => i ? cx.lineTo(p[0], p[1]) : cx.moveTo(p[0], p[1]));
-            cx.closePath();
-            cx.fillStyle = 'rgba(241,196,15,0.9)';
-            cx.shadowColor = '#f1c40f'; cx.shadowBlur = 30;
-            cx.fill();
+            // Dibujar el rayo como partículas
+            drawParticleBolt(mainBolt, 0.9 + Math.random() * 0.1, 1);
             cx.restore();
-            // Bordes eléctricos crepitando (mismo estilo que los rayitos del fondo)
-            drawStroke(mainBolt, 0.9 + Math.random() * 0.1, 1);
         }
 
         // Relámpagos cruzando
         for (let i = strikes.length - 1; i >= 0; i--) {
             const s = strikes[i];
-            drawStroke(s.segs, s.life, 0.8);
+            cx.save();
+            drawParticleBolt(s.segs, s.life * 0.8, 0.8);
+            cx.restore();
             s.life -= 0.08;
             if (s.life <= 0) strikes.splice(i, 1);
         }
