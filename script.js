@@ -76,16 +76,16 @@ if (!reducedMotion) (function () {
                 const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < DIST) {
-                    const a = (1 - dist / DIST) * 0.12;
+                    const a = (1 - dist / DIST) * 0.22;
                     cx.strokeStyle = `rgba(241,196,15,${a.toFixed(2)})`;
-                    cx.lineWidth = 0.6;
+                    cx.lineWidth = 1.8;
                     cx.beginPath(); cx.moveTo(pts[i].x, pts[i].y); cx.lineTo(pts[j].x, pts[j].y); cx.stroke();
                 }
             }
         }
         for (const p of pts) {
-            cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            cx.fillStyle = p.spark ? 'rgba(255,217,0,0.85)' : 'rgba(241,196,15,0.4)';
+            cx.beginPath(); cx.arc(p.x, p.y, p.r * 2.2, 0, Math.PI * 2);
+            cx.fillStyle = p.spark ? 'rgba(255,217,0,0.95)' : 'rgba(241,196,15,0.65)';
             cx.fill();
         }
         requestAnimationFrame(frame);
@@ -217,22 +217,26 @@ if (!reducedMotion) (function () {
         });
         mainPoly = pts;
 
-        // Generar múltiples rayos dentro de la forma (efecto multibolt)
+        // Generar múltiples rayos dentro de la forma (efecto multibolt tipo Flash)
         mainBolt = [];
 
-        // Rayo principal con bordes
+        // Rayo principal con bordes dentados
         for (let i = 0; i < pts.length; i++) {
             const a = pts[i], b = pts[(i + 1) % pts.length];
-            mainBolt.push(...jag(a[0], a[1], b[0], b[1], 14, 0.22));
+            mainBolt.push(...jag(a[0], a[1], b[0], b[1], 16, 0.25));
         }
 
-        // Rayos secundarios internos (bifurcaciones)
-        if (Math.random() < 0.6) {
-            const splitPoint = Math.floor(Math.random() * pts.length);
-            const a = pts[splitPoint];
-            const offX = (Math.random() - 0.5) * r.width * 0.3;
-            const offY = (Math.random() - 0.5) * r.height * 0.4;
-            mainBolt.push(...jag(a[0], a[1], a[0] + offX, a[1] + offY, 10, 0.35));
+        // Múltiples rayos secundarios en varias direcciones (como electricidad/Flash)
+        for (let b = 0; b < 4; b++) {
+            if (Math.random() < 0.8) {
+                const splitPoint = Math.floor(Math.random() * pts.length);
+                const a = pts[splitPoint];
+                const angle = (Math.random() * Math.PI * 2);
+                const len = (Math.random() + 0.8) * r.height * 0.5;
+                const endX = a[0] + Math.cos(angle) * len;
+                const endY = a[1] + Math.sin(angle) * len;
+                mainBolt.push(...jag(a[0], a[1], endX, endY, 12, 0.4));
+            }
         }
     }
 
