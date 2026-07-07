@@ -72,7 +72,7 @@ const SCOPE_NAMES = { 'acometida': 'Acometida', 'subestacion': 'Subestación', '
 if (!reducedMotion) (function () {
     const cv = document.getElementById('canvas-grid');
     const cx = cv.getContext('2d');
-    const DIST = 150;
+    const DIST = 230;
     let W, H, pts, N;
     const mouse = { x: -9999, y: -9999 };
 
@@ -84,7 +84,7 @@ if (!reducedMotion) (function () {
             x: Math.random() * W, y: Math.random() * H,
             vx: (Math.random() - 0.5) * 0.4,
             vy: (Math.random() - 0.5) * 0.4,
-            r: Math.random() * 1.6 + 0.7,
+            r: Math.random() * 2.2 + 1.2,
             spark: Math.random() < 0.15, // 15% nodos "chispa" más brillantes
         }));
     }
@@ -93,8 +93,64 @@ if (!reducedMotion) (function () {
     window.addEventListener('resize', () => { if (window.innerWidth !== W) init(); else { H = cv.height = window.innerHeight; } }, { passive: true });
     window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
 
+    /* Relámpagos ambientales: destellos azules y dorados que caen del cielo */
+    const bolts = [];
+    let nextBolt = 90;
+
+    function spawnBolt() {
+        const gold = Math.random() < 0.5;
+        const segs = [];
+        let x = Math.random() * W;
+        let y = -10;
+        const maxY = H * (0.35 + Math.random() * 0.45);
+        while (y < maxY) {
+            const nx2 = x + (Math.random() - 0.5) * 80;
+            const ny2 = y + 25 + Math.random() * 45;
+            segs.push({ x1: x, y1: y, x2: nx2, y2: ny2, branch: false });
+            if (Math.random() < 0.3) {
+                segs.push({
+                    x1: nx2, y1: ny2,
+                    x2: nx2 + (Math.random() - 0.5) * 130,
+                    y2: ny2 + 30 + Math.random() * 55,
+                    branch: true,
+                });
+            }
+            x = nx2; y = ny2;
+        }
+        bolts.push({
+            segs,
+            age: 0,
+            life: 42 + Math.random() * 22,
+            color: gold ? '255,196,32' : '86,166,255',
+        });
+    }
+
+    function drawBolts() {
+        if (--nextBolt <= 0) {
+            spawnBolt();
+            if (Math.random() < 0.3) spawnBolt(); // a veces caen dos
+            nextBolt = 160 + Math.random() * 260;
+        }
+        for (let i = bolts.length - 1; i >= 0; i--) {
+            const b = bolts[i];
+            b.age++;
+            const a = b.age < 6 ? b.age / 6 : Math.max(0, 1 - (b.age - 6) / (b.life - 6));
+            cx.strokeStyle = `rgba(${b.color},${(a * 0.8).toFixed(2)})`;
+            cx.shadowColor = `rgba(${b.color},${(a * 0.9).toFixed(2)})`;
+            cx.shadowBlur = 14;
+            cx.lineCap = 'round';
+            for (const s of b.segs) {
+                cx.lineWidth = s.branch ? 1.5 : 2.6;
+                cx.beginPath(); cx.moveTo(s.x1, s.y1); cx.lineTo(s.x2, s.y2); cx.stroke();
+            }
+            cx.shadowBlur = 0;
+            if (b.age > b.life) bolts.splice(i, 1);
+        }
+    }
+
     function frame() {
         cx.clearRect(0, 0, W, H);
+        drawBolts();
         for (const p of pts) {
             const dx = p.x - mouse.x, dy = p.y - mouse.y;
             const d = Math.sqrt(dx * dx + dy * dy);
@@ -110,9 +166,9 @@ if (!reducedMotion) (function () {
                 const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < DIST) {
-                    const a = (1 - dist / DIST) * 0.28;
+                    const a = (1 - dist / DIST) * 0.30;
                     cx.strokeStyle = `rgba(184,134,11,${a.toFixed(2)})`;
-                    cx.lineWidth = 1.1;
+                    cx.lineWidth = 2;
                     cx.beginPath(); cx.moveTo(pts[i].x, pts[i].y); cx.lineTo(pts[j].x, pts[j].y); cx.stroke();
                 }
             }
@@ -218,11 +274,6 @@ window.addEventListener('DOMContentLoaded', () => {
         // Partículas flotantes (mismo canvas, se dibujan tras el rayo)
         if (typeof ParticlesEffect !== 'undefined') {
             new ParticlesEffect('canvas-lightning');
-        }
-
-        // Descargas interactivas en botones, textos y clicks
-        if (typeof InteractionEffects !== 'undefined') {
-            new InteractionEffects(lightning, 'canvas-lightning');
         }
 
         // Eventos de sonido
