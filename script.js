@@ -93,64 +93,131 @@ if (!reducedMotion) (function () {
     window.addEventListener('resize', () => { if (window.innerWidth !== W) init(); else { H = cv.height = window.innerHeight; } }, { passive: true });
     window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
 
-    /* Relámpagos ambientales: destellos azules y dorados que caen del cielo */
-    const bolts = [];
-    let nextBolt = 90;
+    /* Arcos eléctricos orgánicos entre nodos de la red (azules y dorados).
+       Energía fluyendo por la red: siempre hay 2-3 activos, duran 2-5s
+       y siguen a sus nodos mientras se mueven. */
+    const arcs = [];
+    let frameCount = 0;
 
-    function spawnBolt() {
-        const gold = Math.random() < 0.5;
-        const segs = [];
-        let x = Math.random() * W;
-        let y = -10;
-        const maxY = H * (0.35 + Math.random() * 0.45);
-        while (y < maxY) {
-            const nx2 = x + (Math.random() - 0.5) * 80;
-            const ny2 = y + 25 + Math.random() * 45;
-            segs.push({ x1: x, y1: y, x2: nx2, y2: ny2, branch: false });
-            if (Math.random() < 0.3) {
-                segs.push({
-                    x1: nx2, y1: ny2,
-                    x2: nx2 + (Math.random() - 0.5) * 130,
-                    y2: ny2 + 30 + Math.random() * 55,
-                    branch: true,
-                });
-            }
-            x = nx2; y = ny2;
-        }
-        bolts.push({
-            segs,
-            age: 0,
-            life: 42 + Math.random() * 22,
-            color: gold ? '255,196,32' : '86,166,255',
-        });
+    // Pseudo-aleatorio determinista (estable entre frames para cada arco)
+    function rnd(seed) {
+        const v = Math.sin(seed * 12.9898) * 43758.5453;
+        return v - Math.floor(v);
     }
 
-    function drawBolts() {
-        if (--nextBolt <= 0) {
-            spawnBolt();
-            if (Math.random() < 0.3) spawnBolt(); // a veces caen dos
-            nextBolt = 160 + Math.random() * 260;
-        }
-        for (let i = bolts.length - 1; i >= 0; i--) {
-            const b = bolts[i];
-            b.age++;
-            const a = b.age < 6 ? b.age / 6 : Math.max(0, 1 - (b.age - 6) / (b.life - 6));
-            cx.strokeStyle = `rgba(${b.color},${(a * 0.8).toFixed(2)})`;
-            cx.shadowColor = `rgba(${b.color},${(a * 0.9).toFixed(2)})`;
-            cx.shadowBlur = 14;
-            cx.lineCap = 'round';
-            for (const s of b.segs) {
-                cx.lineWidth = s.branch ? 1.5 : 2.6;
-                cx.beginPath(); cx.moveTo(s.x1, s.y1); cx.lineTo(s.x2, s.y2); cx.stroke();
+    function spawnArc() {
+        for (let tries = 0; tries < 40; tries++) {
+            const a = pts[(Math.random() * N) | 0];
+            const b = pts[(Math.random() * N) | 0];
+            if (a === b) continue;
+            const d = Math.hypot(a.x - b.x, a.y - b.y);
+            if (d > 70 && d < DIST * 1.1) {
+                arcs.push({
+                    a, b,
+                    gold: Math.random() < 0.45,
+                    age: 0,
+                    life: 140 + Math.random() * 180,
+                    seed: Math.random() * 100,
+                });
+                return;
             }
-            cx.shadowBlur = 0;
-            if (b.age > b.life) bolts.splice(i, 1);
         }
+    }
+
+    function drawArcs() {
+        if (arcs.length < 3 && (arcs.length === 0 || Math.random() < 0.02)) spawnArc();
+
+        for (let i = arcs.length - 1; i >= 0; i--) {
+            const arc = arcs[i];
+            arc.age++;
+
+            const { a, b } = arc;
+            const dx = b.x - a.x, dy = b.y - a.y;
+            const len = Math.hypot(dx, dy);
+
+            // El arco muere si termina su vida o los nodos se alejan demasiado
+            if (arc.age > arc.life || len > DIST * 1.35 || len < 20) {
+                arcs.splice(i, 1);
+                continue;
+            }
+
+            // Envolvente: fade-in, parpadeo eléctrico sostenido, fade-out
+            let alpha;
+            if (arc.age < 20) alpha = arc.age / 20;
+            else if (arc.age > arc.life - 40) alpha = (arc.life - arc.age) / 40;
+            else alpha = 1;
+            alpha *= 0.75 + 0.25 * Math.sin(frameCount * 0.35 + arc.seed);
+
+            const nx = -dy / len, ny = dx / len;
+            const color = arc.gold ? '255,200,60' : '120,190,255';
+
+            // Trayectoria orgánica: ondas suaves + chisporroteo fino, anclada en los nodos
+            const K = Math.max(8, (len / 12) | 0);
+            const path = [];
+            for (let j = 0; j <= K; j++) {
+                const s = j / K;
+                const env = Math.sin(Math.PI * s);
+                const w1 = Math.sin(s * 6.3 + frameCount * 0.11 + arc.seed) * 7;
+                const w2 = Math.sin(s * 15.7 - frameCount * 0.19 + arc.seed * 2.7) * 3.5;
+                const fl = (rnd(arc.seed + j * 7.31 + ((frameCount / 4) | 0) * 13.7) - 0.5) * 4;
+                const off = (w1 + w2 + fl) * env;
+                path.push({ x: a.x + dx * s + nx * off, y: a.y + dy * s + ny * off });
+            }
+
+            const trace = () => {
+                cx.beginPath();
+                path.forEach((p, j) => j ? cx.lineTo(p.x, p.y) : cx.moveTo(p.x, p.y));
+            };
+
+            cx.lineCap = 'round';
+            cx.lineJoin = 'round';
+
+            // Halo de color
+            cx.strokeStyle = `rgba(${color},${(alpha * 0.6).toFixed(2)})`;
+            cx.lineWidth = 3.6;
+            cx.shadowColor = `rgba(${color},${alpha.toFixed(2)})`;
+            cx.shadowBlur = 18;
+            trace(); cx.stroke();
+
+            // Núcleo blanco-caliente
+            cx.strokeStyle = `rgba(255,255,255,${(alpha * 0.95).toFixed(2)})`;
+            cx.lineWidth = 1.4;
+            cx.shadowBlur = 9;
+            trace(); cx.stroke();
+
+            // Zarcillos finos que se desprenden (cambian cada ~6 frames)
+            const step = (frameCount / 6) | 0;
+            for (let t = 0; t < 3; t++) {
+                const r1 = rnd(arc.seed + t * 31.7 + step * 3.1);
+                const r2 = rnd(arc.seed + t * 57.3 + step * 5.7);
+                const p = path[1 + ((r1 * (K - 2)) | 0)];
+                const ang = Math.atan2(ny, nx) + (r2 - 0.5) * 2.2;
+                const tl = 8 + r2 * 18;
+                const mx = p.x + Math.cos(ang) * tl * 0.5 + (r1 - 0.5) * 6;
+                const my = p.y + Math.sin(ang) * tl * 0.5 + (r2 - 0.5) * 6;
+                cx.strokeStyle = `rgba(${color},${(alpha * 0.65).toFixed(2)})`;
+                cx.lineWidth = 0.9;
+                cx.shadowBlur = 6;
+                cx.beginPath();
+                cx.moveTo(p.x, p.y);
+                cx.quadraticCurveTo(mx, my, p.x + Math.cos(ang) * tl, p.y + Math.sin(ang) * tl);
+                cx.stroke();
+            }
+
+            // Nodos extremos encendidos mientras el arco está activo
+            cx.shadowBlur = 10;
+            cx.shadowColor = `rgba(${color},${alpha.toFixed(2)})`;
+            cx.fillStyle = `rgba(255,255,255,${(alpha * 0.9).toFixed(2)})`;
+            cx.beginPath(); cx.arc(a.x, a.y, 2.6, 0, Math.PI * 2); cx.fill();
+            cx.beginPath(); cx.arc(b.x, b.y, 2.6, 0, Math.PI * 2); cx.fill();
+
+            cx.shadowBlur = 0;
+        }
+        frameCount++;
     }
 
     function frame() {
         cx.clearRect(0, 0, W, H);
-        drawBolts();
         for (const p of pts) {
             const dx = p.x - mouse.x, dy = p.y - mouse.y;
             const d = Math.sqrt(dx * dx + dy * dy);
@@ -180,6 +247,7 @@ if (!reducedMotion) (function () {
             cx.fill();
         }
         cx.shadowBlur = 0;
+        drawArcs();
         requestAnimationFrame(frame);
     }
     frame();

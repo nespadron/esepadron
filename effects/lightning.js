@@ -31,7 +31,10 @@ class LightningEffect {
     this.height = h;
     this.dpr = dpr;
 
-    window.addEventListener('resize', () => this.setupCanvas(), { passive: true });
+    if (!this._resizeBound) {
+      this._resizeBound = true;
+      window.addEventListener('resize', () => this.setupCanvas(), { passive: true });
+    }
   }
 
   initState() {

@@ -19,8 +19,8 @@ class ParticlesEffect {
       colors: ['rgba(255, 255, 255, ', 'rgba(241, 196, 15, ', 'rgba(218, 165, 32, '],
       minSize: 0.5,
       maxSize: 2.5,
-      minLifetime: 3000,
-      maxLifetime: 8000,
+      minLifetime: 300,  // frames (~5s a 60fps)
+      maxLifetime: 700,  // frames (~12s a 60fps)
       minSpeed: 0.3,
       maxSpeed: 0.8,
       mouseInteractionDistance: 200,
@@ -50,7 +50,8 @@ class ParticlesEffect {
       vy: (Math.random() - 0.5) * this.config.maxSpeed,
       size: Math.random() * (this.config.maxSize - this.config.minSize) + this.config.minSize,
       color,
-      alpha: Math.random() * 0.6 + 0.4,
+      alpha: 0,
+      baseAlpha: Math.random() * 0.6 + 0.4,
       lifetime: Math.random() * (this.config.maxLifetime - this.config.minLifetime) + this.config.minLifetime,
       age: 0,
       phase: Math.random() * Math.PI * 2, // Para animación de flotación
@@ -97,11 +98,13 @@ class ParticlesEffect {
       if (p.y < -20) p.y = height + 20;
       if (p.y > height + 20) p.y = -20;
 
-      // Fade in/out
-      if (p.age < 500) {
-        p.alpha = (p.age / 500) * (Math.random() * 0.6 + 0.4);
-      } else if (p.age > p.lifetime - 500) {
-        p.alpha = ((p.lifetime - p.age) / 500) * (Math.random() * 0.6 + 0.4);
+      // Fade in/out suave (60 frames ≈ 1s)
+      if (p.age < 60) {
+        p.alpha = (p.age / 60) * p.baseAlpha;
+      } else if (p.age > p.lifetime - 60) {
+        p.alpha = ((p.lifetime - p.age) / 60) * p.baseAlpha;
+      } else {
+        p.alpha = p.baseAlpha;
       }
 
       // Remover si expiró
