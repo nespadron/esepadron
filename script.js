@@ -125,7 +125,7 @@ if (!reducedMotion) (function () {
     }
 
     function drawArcs() {
-        if (arcs.length < 3 && (arcs.length === 0 || Math.random() < 0.02)) spawnArc();
+        if (arcs.length < 6 && (arcs.length < 2 || Math.random() < 0.05)) spawnArc();
 
         for (let i = arcs.length - 1; i >= 0; i--) {
             const arc = arcs[i];
@@ -157,9 +157,9 @@ if (!reducedMotion) (function () {
             for (let j = 0; j <= K; j++) {
                 const s = j / K;
                 const env = Math.sin(Math.PI * s);
-                const w1 = Math.sin(s * 6.3 + frameCount * 0.11 + arc.seed) * 7;
-                const w2 = Math.sin(s * 15.7 - frameCount * 0.19 + arc.seed * 2.7) * 3.5;
-                const fl = (rnd(arc.seed + j * 7.31 + ((frameCount / 4) | 0) * 13.7) - 0.5) * 4;
+                const w1 = Math.sin(s * 6.3 + frameCount * 0.11 + arc.seed) * 9;
+                const w2 = Math.sin(s * 15.7 - frameCount * 0.19 + arc.seed * 2.7) * 4.5;
+                const fl = (rnd(arc.seed + j * 7.31 + ((frameCount / 4) | 0) * 13.7) - 0.5) * 5;
                 const off = (w1 + w2 + fl) * env;
                 path.push({ x: a.x + dx * s + nx * off, y: a.y + dy * s + ny * off });
             }
@@ -173,16 +173,16 @@ if (!reducedMotion) (function () {
             cx.lineJoin = 'round';
 
             // Halo de color
-            cx.strokeStyle = `rgba(${color},${(alpha * 0.6).toFixed(2)})`;
-            cx.lineWidth = 3.6;
+            cx.strokeStyle = `rgba(${color},${(alpha * 0.7).toFixed(2)})`;
+            cx.lineWidth = 5.5;
             cx.shadowColor = `rgba(${color},${alpha.toFixed(2)})`;
-            cx.shadowBlur = 18;
+            cx.shadowBlur = 24;
             trace(); cx.stroke();
 
             // Núcleo blanco-caliente
             cx.strokeStyle = `rgba(255,255,255,${(alpha * 0.95).toFixed(2)})`;
-            cx.lineWidth = 1.4;
-            cx.shadowBlur = 9;
+            cx.lineWidth = 2.2;
+            cx.shadowBlur = 12;
             trace(); cx.stroke();
 
             // Zarcillos finos que se desprenden (cambian cada ~6 frames)
@@ -195,8 +195,8 @@ if (!reducedMotion) (function () {
                 const tl = 8 + r2 * 18;
                 const mx = p.x + Math.cos(ang) * tl * 0.5 + (r1 - 0.5) * 6;
                 const my = p.y + Math.sin(ang) * tl * 0.5 + (r2 - 0.5) * 6;
-                cx.strokeStyle = `rgba(${color},${(alpha * 0.65).toFixed(2)})`;
-                cx.lineWidth = 0.9;
+                cx.strokeStyle = `rgba(${color},${(alpha * 0.7).toFixed(2)})`;
+                cx.lineWidth = 1.3;
                 cx.shadowBlur = 6;
                 cx.beginPath();
                 cx.moveTo(p.x, p.y);
@@ -208,8 +208,8 @@ if (!reducedMotion) (function () {
             cx.shadowBlur = 10;
             cx.shadowColor = `rgba(${color},${alpha.toFixed(2)})`;
             cx.fillStyle = `rgba(255,255,255,${(alpha * 0.9).toFixed(2)})`;
-            cx.beginPath(); cx.arc(a.x, a.y, 2.6, 0, Math.PI * 2); cx.fill();
-            cx.beginPath(); cx.arc(b.x, b.y, 2.6, 0, Math.PI * 2); cx.fill();
+            cx.beginPath(); cx.arc(a.x, a.y, 3.4, 0, Math.PI * 2); cx.fill();
+            cx.beginPath(); cx.arc(b.x, b.y, 3.4, 0, Math.PI * 2); cx.fill();
 
             cx.shadowBlur = 0;
         }
