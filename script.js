@@ -206,15 +206,12 @@ window.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Componentes adicionales
-        if (typeof CustomCursor !== 'undefined') {
-            const cursor = new CustomCursor(lightning);
+        // Campo electromagnético dibujado sobre el rayo
+        if (emField) {
             const originalRender = lightning.render.bind(lightning);
-
             lightning.render = function() {
                 originalRender();
-                cursor.draw(lightning.ctx);
-                if (emField) emField.draw();
+                emField.draw();
             };
         }
 

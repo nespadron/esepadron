@@ -1,7 +1,7 @@
 /**
- * Lightning Effect - Sistema de rayo realista y cinematográfico
- * Inspirado en descargas eléctricas reales con múltiples capas y ramificaciones
- * Electricidad densa recorriendo constantemente, glow intenso, bloom exterior
+ * Lightning Effect - Rayo estilo "Flash"
+ * Silueta afilada y alargada con dos quiebres, núcleo brillante,
+ * estelas de velocidad, arcos eléctricos finos e impacto en el suelo.
  */
 
 class LightningEffect {
@@ -36,14 +36,9 @@ class LightningEffect {
 
   initState() {
     this.boltShape = null;
-    this.electricityBranches = [];
-    this.sparks = [];
     this.time = 0;
-    this.intensity = 0.8;
-    this.loadProgress = 0;
+    this.intensity = 0.85;
     this.mouse = { x: -9999, y: -9999 };
-    this.isEntering = true;
-    this.entryTime = 0;
 
     window.addEventListener('mousemove', (e) => {
       this.mouse.x = e.clientX;
@@ -57,44 +52,40 @@ class LightningEffect {
     const rect = this.stage.getBoundingClientRect();
     if (rect.height === 0) return;
 
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-
-    const baseShape = [
-      [0.5, 0.0],
-      [0.62, 0.02],
-      [0.72, 0.18],
-      [0.62, 0.28],
-      [0.68, 0.48],
-      [0.54, 0.56],
-      [0.62, 0.78],
-      [0.50, 0.92],
-      [0.44, 1.0],
-      [0.42, 0.82],
-      [0.32, 0.54],
-      [0.24, 0.48],
-      [0.32, 0.28],
-      [0.22, 0.18],
+    // Silueta estilo Flash: diagonal alargada, dos quiebres, puntas de aguja.
+    // La punta inferior impacta el "suelo" (parte baja del stage).
+    const base = [
+      [0.88, 0.00], // punta superior (aguja)
+      [0.62, 0.30],
+      [0.76, 0.345], // quiebre superior
+      [0.46, 0.63],
+      [0.585, 0.665], // quiebre inferior
+      [0.10, 1.00], // punta de impacto
+      [0.385, 0.645],
+      [0.27, 0.615],
+      [0.545, 0.325],
+      [0.435, 0.29],
+      [0.80, 0.015],
     ];
 
-    const scale = rect.width * 0.8;
-    const angle = -0.25;
+    this.boltShape = base.map(([nx, ny]) => ({
+      x: rect.left + nx * rect.width,
+      y: rect.top + ny * rect.height,
+    }));
 
-    this.boltShape = baseShape.map(([nx, ny]) => {
-      const x = (nx - 0.5) * 2;
-      const y = (ny - 0.5) * 2;
-
-      const rx = x * Math.cos(angle) - y * Math.sin(angle);
-      const ry = x * Math.sin(angle) + y * Math.cos(angle);
-
-      return {
-        x: centerX + rx * scale * 0.5,
-        y: centerY + ry * scale * 0.6,
-      };
-    });
+    this.top = this.boltShape[0];
+    this.tip = this.boltShape[5];
   }
 
-  // Electricidad DENSA recorriendo el borde - mucho más realista
+  tracePath() {
+    const ctx = this.ctx;
+    const shape = this.boltShape;
+    ctx.beginPath();
+    shape.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
+    ctx.closePath();
+  }
+
+  // Arcos eléctricos finos alrededor del rayo (los "rayos" ambientales)
   generateElectricity() {
     if (!this.boltShape || this.boltShape.length < 2) return [];
 
@@ -114,24 +105,21 @@ class LightningEffect {
       const nx = -dy / len;
       const ny = dx / len;
 
-      // MÁS puntos = más ramificaciones densas
-      const points = Math.max(3, Math.floor(len / 4));
+      const points = Math.max(2, Math.floor(len / 7));
 
       for (let j = 0; j < points; j++) {
         const t = j / points;
         const x = p1.x + dx * t;
         const y = p1.y + dy * t;
 
-        // Ruido multi-frecuencia MÁS complejo
         const f1 = Math.sin((x * 0.01 + time * 50) * 0.004) * 0.35;
         const f2 = Math.cos((y * 0.01 + time * 40) * 0.005) * 0.35;
         const f3 = Math.sin((i + time * 0.6) * 0.6) * 0.3;
         const noise = f1 + f2 + f3;
 
-        // MUCHAS más ramificaciones
-        if (Math.abs(noise) > 0.3 || Math.random() < 0.25) {
-          const outwardDist = 6 + Math.abs(noise) * 18;
-          const branchLen = 14 + Math.sin(time + i * 0.5) * 10;
+        if (Math.abs(noise) > 0.42 || Math.random() < 0.10) {
+          const outwardDist = 8 + Math.abs(noise) * 20;
+          const branchLen = 16 + Math.sin(time + i * 0.5) * 10;
           const angle = Math.atan2(ny, nx) + noise * 0.9 + (Math.random() - 0.5) * 0.5;
 
           branches.push({
@@ -139,12 +127,11 @@ class LightningEffect {
             y1: y + ny * outwardDist,
             x2: x + nx * outwardDist + Math.cos(angle) * branchLen,
             y2: y + ny * outwardDist + Math.sin(angle) * branchLen,
-            alpha: Math.max(0.15, Math.abs(noise)),
-            width: 0.7 + Math.abs(noise) * 0.9,
+            alpha: Math.max(0.12, Math.abs(noise) * 0.8),
+            width: 0.6 + Math.abs(noise) * 0.6,
           });
 
-          // Sub-ramificaciones adicionales
-          if (Math.random() < 0.4) {
+          if (Math.random() < 0.35) {
             const subAngle = angle + (Math.random() - 0.5) * 1.2;
             const subLen = branchLen * (0.4 + Math.random() * 0.3);
             branches.push({
@@ -152,8 +139,8 @@ class LightningEffect {
               y1: y + ny * outwardDist + Math.sin(angle) * branchLen * 0.5,
               x2: x + nx * outwardDist + Math.cos(angle) * branchLen * 0.5 + Math.cos(subAngle) * subLen,
               y2: y + ny * outwardDist + Math.sin(angle) * branchLen * 0.5 + Math.sin(subAngle) * subLen,
-              alpha: Math.max(0.1, Math.abs(noise) * 0.6),
-              width: 0.4 + Math.abs(noise) * 0.4,
+              alpha: Math.max(0.08, Math.abs(noise) * 0.5),
+              width: 0.4,
             });
           }
         }
@@ -163,157 +150,189 @@ class LightningEffect {
     return branches;
   }
 
-  drawBoltCore() {
-    if (!this.boltShape) return;
-
-    const ctx = this.ctx;
-    const shape = this.boltShape;
-
-    ctx.fillStyle = 'rgba(15, 12, 8, 0.9)';
-    ctx.beginPath();
-    shape.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
-    ctx.closePath();
-    ctx.fill();
-  }
-
-  drawBoltBorder() {
-    if (!this.boltShape) return;
-
-    const ctx = this.ctx;
-    const shape = this.boltShape;
-
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.98)';
-    ctx.lineWidth = 2.5;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.shadowColor = 'rgba(255, 255, 255, 0.95)';
-    ctx.shadowBlur = 12;
-
-    ctx.beginPath();
-    shape.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
-    ctx.closePath();
-    ctx.stroke();
-  }
-
-  drawBoltGlow() {
-    if (!this.boltShape) return;
-
-    const ctx = this.ctx;
-    const shape = this.boltShape;
-
-    // Glow amarillo INTENSO
-    ctx.shadowColor = 'rgba(255, 200, 0, 1)';
-    ctx.shadowBlur = 32;
-    ctx.strokeStyle = 'rgba(255, 230, 50, 0.8)';
-    ctx.lineWidth = 8;
-
-    ctx.beginPath();
-    shape.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
-    ctx.closePath();
-    ctx.stroke();
-
-    // Glow naranja/dorado
-    ctx.shadowColor = 'rgba(255, 150, 0, 0.6)';
-    ctx.shadowBlur = 40;
-    ctx.strokeStyle = 'rgba(255, 180, 0, 0.4)';
-    ctx.lineWidth = 16;
-
-    ctx.beginPath();
-    shape.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
-    ctx.closePath();
-    ctx.stroke();
-  }
-
-  drawBoltBloom() {
-    if (!this.boltShape) return;
-
-    const ctx = this.ctx;
-    const shape = this.boltShape;
-
-    ctx.shadowColor = 'rgba(255, 200, 0, 0.8)';
-    ctx.shadowBlur = 60;
-    ctx.fillStyle = 'rgba(255, 200, 0, 0.1)';
-
-    ctx.beginPath();
-    shape.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
-    ctx.closePath();
-    ctx.fill();
-  }
-
   drawElectricity(branches) {
     const ctx = this.ctx;
 
     branches.forEach((branch) => {
       const alpha = branch.alpha * this.intensity;
 
-      // Línea principal - blanca y brillante
-      ctx.strokeStyle = `rgba(255, 255, 180, ${alpha * 0.95})`;
+      ctx.strokeStyle = `rgba(255, 235, 140, ${alpha * 0.9})`;
       ctx.lineWidth = branch.width;
       ctx.lineCap = 'round';
-      ctx.shadowColor = `rgba(255, 255, 120, ${alpha * 0.8})`;
-      ctx.shadowBlur = 8;
+      ctx.shadowColor = `rgba(255, 220, 80, ${alpha * 0.7})`;
+      ctx.shadowBlur = 7;
 
       ctx.beginPath();
       ctx.moveTo(branch.x1, branch.y1);
       ctx.lineTo(branch.x2, branch.y2);
       ctx.stroke();
-
-      // Ramificación terciaria
-      if (Math.random() < 0.45 && alpha > 0.25) {
-        const angle = Math.atan2(branch.y2 - branch.y1, branch.x2 - branch.x1);
-        const len = Math.hypot(branch.x2 - branch.x1, branch.y2 - branch.y1);
-        const t = 0.5 + Math.random() * 0.4;
-        const px = branch.x1 + Math.cos(angle) * len * t;
-        const py = branch.y1 + Math.sin(angle) * len * t;
-
-        ctx.strokeStyle = `rgba(255, 255, 200, ${alpha * 0.55})`;
-        ctx.lineWidth = branch.width * 0.35;
-        ctx.shadowColor = `rgba(255, 255, 150, ${alpha * 0.4})`;
-        ctx.shadowBlur = 5;
-
-        ctx.beginPath();
-        ctx.moveTo(px, py);
-        const sideAngle = angle + (Math.random() - 0.5) * 1;
-        ctx.lineTo(px + Math.cos(sideAngle) * 8, py + Math.sin(sideAngle) * 8);
-        ctx.stroke();
-      }
     });
   }
 
-  drawElectricalArcs() {
-    if (!this.boltShape) return;
-
+  // Resplandor amplio detrás del rayo
+  drawBloom() {
     const ctx = this.ctx;
-    const lastPoint = this.boltShape[this.boltShape.length - 1];
+    const cx = (this.top.x + this.tip.x) / 2;
+    const cy = (this.top.y + this.tip.y) / 2;
+    const r = Math.hypot(this.top.x - this.tip.x, this.top.y - this.tip.y) * 0.75;
+    if (r <= 0) return;
 
-    const arcRadius = 40 + Math.sin(this.time * 0.007) * 15;
-    const arcAlpha = Math.max(0.35, Math.sin(this.time * 0.005) * 0.8 + 0.55) * this.intensity;
+    const pulse = 0.10 + Math.sin(this.time * 0.004) * 0.03;
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    g.addColorStop(0, `rgba(255, 208, 60, ${pulse})`);
+    g.addColorStop(1, 'rgba(255, 208, 60, 0)');
 
-    ctx.strokeStyle = `rgba(255, 210, 0, ${arcAlpha * 0.9})`;
-    ctx.lineWidth = 3;
-    ctx.shadowColor = `rgba(255, 200, 0, ${arcAlpha})`;
-    ctx.shadowBlur = 22;
+    ctx.fillStyle = g;
+    ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+  }
 
-    ctx.beginPath();
-    ctx.arc(lastPoint.x, lastPoint.y + 25, arcRadius, 0.15 * Math.PI, 0.85 * Math.PI, false);
+  // Halo exterior del cuerpo
+  drawBoltGlow() {
+    const ctx = this.ctx;
+
+    ctx.lineJoin = 'round';
+
+    ctx.shadowColor = 'rgba(255, 200, 0, 0.95)';
+    ctx.shadowBlur = 36;
+    ctx.strokeStyle = 'rgba(255, 212, 40, 0.55)';
+    ctx.lineWidth = 6;
+    this.tracePath();
     ctx.stroke();
 
-    const sparkCount = 5 + Math.floor(Math.sin(this.time * 0.012) * 2);
-    for (let i = 0; i < sparkCount; i++) {
-      const angle = (Math.PI / 4) + (i * Math.PI / sparkCount);
-      const sx = lastPoint.x + Math.cos(angle) * (arcRadius - 2);
-      const sy = lastPoint.y + 25 + Math.sin(angle) * (arcRadius - 2);
+    ctx.shadowColor = 'rgba(255, 150, 0, 0.5)';
+    ctx.shadowBlur = 55;
+    ctx.strokeStyle = 'rgba(255, 180, 0, 0.22)';
+    ctx.lineWidth = 14;
+    this.tracePath();
+    ctx.stroke();
+  }
 
-      ctx.fillStyle = `rgba(255, 255, 220, ${arcAlpha * 1.1})`;
+  // Cuerpo del rayo: degradado dorado con núcleo blanco brillante
+  drawBoltBody() {
+    const ctx = this.ctx;
+
+    const g = ctx.createLinearGradient(this.top.x, this.top.y, this.tip.x, this.tip.y);
+    g.addColorStop(0, 'rgba(255, 250, 215, 1)');
+    g.addColorStop(0.45, 'rgba(255, 214, 64, 1)');
+    g.addColorStop(1, 'rgba(255, 172, 0, 1)');
+
+    ctx.shadowColor = 'rgba(255, 200, 0, 0.9)';
+    ctx.shadowBlur = 22;
+    ctx.fillStyle = g;
+    this.tracePath();
+    ctx.fill();
+
+    // Núcleo interior brillante (efecto glossy)
+    const cx = (this.top.x + this.tip.x) / 2;
+    const cy = (this.top.y + this.tip.y) / 2;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(0.55, 0.6);
+    ctx.translate(-cx, -cy);
+    ctx.shadowColor = 'rgba(255, 255, 255, 0.9)';
+    ctx.shadowBlur = 16;
+    ctx.fillStyle = 'rgba(255, 255, 240, 0.85)';
+    this.tracePath();
+    ctx.fill();
+    ctx.restore();
+
+    // Borde nítido
+    ctx.shadowColor = 'rgba(255, 235, 130, 1)';
+    ctx.shadowBlur = 9;
+    ctx.strokeStyle = 'rgba(255, 246, 205, 0.9)';
+    ctx.lineWidth = 1.6;
+    ctx.lineJoin = 'round';
+    this.tracePath();
+    ctx.stroke();
+  }
+
+  // Estelas de velocidad paralelas a los bordes largos
+  drawSpeedStreaks() {
+    const ctx = this.ctx;
+    const streaks = [[0, 1], [4, 5], [9, 10]];
+
+    streaks.forEach(([i, j], k) => {
+      const p = this.boltShape[i];
+      const q = this.boltShape[j];
+      const dx = q.x - p.x;
+      const dy = q.y - p.y;
+
+      const x1 = p.x - dx * 0.35;
+      const y1 = p.y - dy * 0.35;
+      const x2 = q.x + dx * 0.35;
+      const y2 = q.y + dy * 0.35;
+
+      const flick = 0.55 + 0.45 * Math.sin(this.time * 0.01 + k * 2.1);
+      const g = ctx.createLinearGradient(x1, y1, x2, y2);
+      g.addColorStop(0, 'rgba(255, 255, 255, 0)');
+      g.addColorStop(0.5, `rgba(255, 255, 235, ${0.5 * flick})`);
+      g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+      ctx.strokeStyle = g;
+      ctx.lineWidth = 1.4;
+      ctx.lineCap = 'round';
+      ctx.shadowColor = 'rgba(255, 255, 200, 0.8)';
+      ctx.shadowBlur = 8;
+
       ctx.beginPath();
-      ctx.arc(sx, sy, 2, 0, Math.PI * 2);
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    });
+  }
+
+  // Impacto en el suelo: resplandor + chispas que saltan
+  drawImpact() {
+    const ctx = this.ctx;
+    const t = this.tip;
+    const flick = 0.7 + 0.3 * Math.sin(this.time * 0.02);
+
+    // Resplandor elíptico en el punto de impacto
+    const g = ctx.createRadialGradient(t.x, t.y, 0, t.x, t.y, 70);
+    g.addColorStop(0, `rgba(255, 242, 185, ${0.5 * flick})`);
+    g.addColorStop(0.3, `rgba(255, 200, 40, ${0.28 * flick})`);
+    g.addColorStop(1, 'rgba(255, 200, 40, 0)');
+
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.ellipse(t.x, t.y, 70, 26, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Chispas radiando hacia arriba (pseudo-aleatorias, cambian cada ~8 frames)
+    const sparkCount = 7;
+    const step = Math.floor(this.time / 8);
+
+    for (let i = 0; i < sparkCount; i++) {
+      const seed = Math.sin(i * 12.9898 + step * 78.233) * 43758.5453;
+      const rnd = seed - Math.floor(seed);
+      const ang = -Math.PI * (0.15 + 0.7 * (i / sparkCount)) + (rnd - 0.5) * 0.4;
+      const len = 10 + rnd * 26;
+      const alpha = (0.35 + rnd * 0.5) * flick;
+
+      const ex = t.x + Math.cos(ang) * len;
+      const ey = t.y + Math.sin(ang) * len;
+
+      ctx.strokeStyle = `rgba(255, 246, 200, ${alpha})`;
+      ctx.lineWidth = 1.3;
+      ctx.lineCap = 'round';
+      ctx.shadowColor = 'rgba(255, 220, 80, 0.9)';
+      ctx.shadowBlur = 6;
+
+      ctx.beginPath();
+      ctx.moveTo(t.x, t.y);
+      ctx.lineTo(ex, ey);
+      ctx.stroke();
+
+      ctx.fillStyle = `rgba(255, 255, 230, ${alpha})`;
+      ctx.beginPath();
+      ctx.arc(ex, ey, 1.4, 0, Math.PI * 2);
       ctx.fill();
     }
   }
 
   updateIntensity() {
-    const pulse = Math.sin(this.time * 0.0025) * 0.12 + 0.88;
-    this.intensity = Math.max(0.65, pulse);
+    const pulse = Math.sin(this.time * 0.0025) * 0.1 + 0.9;
+    this.intensity = Math.max(0.7, pulse);
   }
 
   render() {
@@ -328,18 +347,17 @@ class LightningEffect {
     if (!this.boltShape) return;
 
     ctx.globalAlpha = this.intensity;
-
-    this.drawBoltCore();
-    this.drawBoltBorder();
-    this.drawBoltGlow();
-    this.drawBoltBloom();
+    this.drawBloom();
 
     const branches = this.generateElectricity();
-    ctx.globalAlpha = Math.min(1, this.intensity * 1.4);
+    ctx.globalAlpha = Math.min(1, this.intensity * 1.2);
     this.drawElectricity(branches);
 
-    ctx.globalAlpha = this.intensity * 0.9;
-    this.drawElectricalArcs();
+    ctx.globalAlpha = this.intensity;
+    this.drawBoltGlow();
+    this.drawBoltBody();
+    this.drawSpeedStreaks();
+    this.drawImpact();
 
     ctx.shadowBlur = 0;
     ctx.globalAlpha = 1;
@@ -361,8 +379,8 @@ class LightningEffect {
   distanceToMouse() {
     if (!this.boltShape || this.boltShape.length === 0) return Infinity;
 
-    const centerX = this.boltShape[0].x;
-    const centerY = this.boltShape[0].y;
+    const centerX = (this.top.x + this.tip.x) / 2;
+    const centerY = (this.top.y + this.tip.y) / 2;
 
     const dx = this.mouse.x - centerX;
     const dy = this.mouse.y - centerY;
